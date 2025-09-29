@@ -1,6 +1,7 @@
 import { Customer } from "../entities/Customer";
 import { Order } from "../entities/Order";
 import { DatabaseManager } from "./database.service";
+import { GetPayload } from "./store";
 
 export type CreateCustomerPayload = {
     name: string,
@@ -19,6 +20,14 @@ export class CustomerService {
             this.instance = new CustomerService(database);
         }
         return this.instance;
+    }
+
+    getCustomerById(payload: GetPayload): Promise<Customer | null> {
+        const repository = DatabaseManager.getRepository(Customer);
+        return repository.findOne({
+            where: {id: payload.id},
+            relations: [...(payload?.relations ?? [])]
+        })
     }
 
     createCustomer(payload: CreateCustomerPayload) {

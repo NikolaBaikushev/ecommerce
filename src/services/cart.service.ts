@@ -28,7 +28,7 @@ export class CartService {
         const repository = DatabaseManager.getRepository(Cart);
         let cart = await repository.findOne({
             where: { customer: { id: payload.customer.id } },
-            relations: ['items']
+            relations: ['items', 'items.product']
         });
 
         if (!cart) {
@@ -36,14 +36,13 @@ export class CartService {
            cart.customer = payload.customer;
            cart.items = []
         }
-        const product = await DatabaseManager.getRepository(Product).findOneBy({id: payload.product.id});
-        // TODO: try catch;
         
-        // quantity:
         const cartItem = DatabaseManager.getRepository(CartItem).create({
-            product: product as Product, // TODO: change later,
+            product: payload.product,
             quantity: 1,
         })
+
+        cartItem.cart = cart;
 
         cart.items.push(cartItem);
         cart.totalPrice = cart.items.reduce((acc, c) => acc + c.product.price, 0);

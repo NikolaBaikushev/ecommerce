@@ -1,5 +1,6 @@
 import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
+import { GetPayload } from "./store";
 
 export type CreateProductPayload = {
     name: string,
@@ -26,6 +27,14 @@ export class ProductService {
         const product: Product = repository.create(payload);
 
         return repository.save(product);
+    }
+
+    async getProductById(payload: GetPayload): Promise<Product | null> {
+        const repository = DatabaseManager.getRepository(Product);
+        return repository.findOne({
+            where: { id: payload.id },
+            relations: [...(payload?.relations ?? [])]
+        })
     }
 }
 

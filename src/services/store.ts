@@ -1,3 +1,4 @@
+import { Entity } from "typeorm";
 import { Cart } from "../entities/Cart";
 import { Customer } from "../entities/Customer";
 import { Product } from "../entities/Product";
@@ -21,6 +22,12 @@ type CreatePayloadMap = {
 }
 
 
+export type GetPayload = {
+    id: number,
+    relations?: string[]
+}
+
+type EntityConstructor<T> = { new(): T }
 
 export class StoreManager {
     static #instance: StoreManager;
@@ -48,6 +55,21 @@ export class StoreManager {
                 throw new Error('Invalid entity type');
         }
     }
+
+    public async getEntityById<T extends EntityType>(
+        entityType: T,
+        payload: GetPayload
+    ): Promise<EntityMap[T] | null> {
+        switch (entityType) {
+            case EntityType.CUSTOMER:
+                return this.customerService.getCustomerById(payload) as Promise<EntityMap[T] | null>;
+            case EntityType.PRODUCT:
+                return this.productService.getProductById(payload) as Promise<EntityMap[T] | null>;
+            default:
+                return null;
+        }
+    }
+
 
     public async addToCart(payload: AddToCart): Promise<Cart> {
         return await this.cartService.addToCart(payload);
