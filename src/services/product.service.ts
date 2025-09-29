@@ -1,5 +1,5 @@
-import { Product } from "../entities/product";
-import { DatabaseManager } from "./database";
+import { Product } from "../entities/Product";
+import { DatabaseManager } from "./database.service";
 
 
 export class ProductService {

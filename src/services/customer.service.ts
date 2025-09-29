@@ -1,4 +1,4 @@
-import { DatabaseManager } from "./database";
+import { DatabaseManager } from "./database.service";
 
 export class CustomerService {
     private static instance: CustomerService;
