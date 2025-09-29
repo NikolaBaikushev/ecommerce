@@ -3,7 +3,8 @@ import { Customer } from "./entities/Customer";
 import { Product } from "./entities/Product";
 import { DatabaseManager } from "./services/database.service";
 import { EntityType, StoreManager } from "./services/store";
-
+import chalk from 'chalk';
+import { Logger } from "./services/logger.service";
 
 
 async function main() {
@@ -11,65 +12,70 @@ async function main() {
     let product: Product | null = null;
 
     const store = StoreManager.getInstance();
+    const logger = Logger.getInstance();
     try {
         await DatabaseManager.getInstance().initialize();
-        console.log('===== Database successfully connected =====')
+        logger.green('===== Database successfully connected =====')
     } catch (error) {
-        console.log(`=== Database connection FAILED, ${error} ===`)
+        logger.red(`=== Database connection FAILED, ${error} ===`)
     }
 
     // try {
     //     product = await createProduct(store);
-    //     console.log(`===== Product created with ID: ${product.id} =====`)
+    //     logger.green(`===== Product created with ID: ${product.id} =====`)
     // } catch (error) {
-    //     console.log(`=== Product created FAILED ===, ${error}`)
+    //     logger.red(`=== Product created FAILED ===, ${error}`)
     // }
 
     // try {
     //     customer = await createCustomer(store);
-    //     console.log(`===== Customer created with ID: ${customer.id} =====`)
+    //     logger.green(`===== Customer created with ID: ${customer.id} =====`)
     // } catch (error) {
-    //     console.log(`=== Customer created FAILED ===, ${error}`)
+    //     logger.red(`=== Customer created FAILED ===, ${error}`)
     // }
 
 
     // try {
     //     if (customer && product) {
     //         const cart = await addToCart(store, customer, product);
-    //         console.log(`===== Cart created with ID: ${cart.id} =====`)
-    //         console.log(`===== Cart Items created: ${cart.id} =====`)
-    //         cart.items.forEach((c) => console.log(`\t ==== ${c.id} ====`))
+    //         logger.green(`===== Cart created with ID: ${cart.id} =====`)
+    //         logger.bgYellow(`===== Cart Items created: ${cart.id} =====`)
+    //         for (const item of cart) {
+    //             logger.yellow(`\t ++++ ${item.id} ++++`)
+    //         }
     //     }
     // } catch (error) {
     //     console.log(`=== Cart created FAILED ===, ${error}`)
     // }
 
-    // Already Existing customer!
+    // // Already Existing customer!
     // try {
     //     const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3 });
     //     const product = await store.getEntityById(EntityType.PRODUCT, { id: 2 })
     //     if (customer && product) {
     //         const cart = await addToCart(store, customer, product);
-    //         console.log(`===== Cart Items Count: ${cart.items.length} =====`)
-    //         console.log(`===== Cart Items created: ${cart.id} =====`)
-    //         cart.items.forEach((c) => console.log(`\t ==== ${c.id} ====`))
+    //         logger.green(`===== Cart Items Count: ${cart.items.length} =====`)
+    //         logger.bgYellow(`===== Cart Items Created: ${cart.id} =====`)
+    //         for (const item of cart) {
+    //             logger.yellow(`\t ++++ ${item.id} ++++`)
+    //         }
     //     }
     // } catch (error) {
-    //     console.log(`=== Cart created FAILED ===, ${error}`)
+    //     logger.red(`=== Cart created FAILED ===, ${error}`)
     // }
 
     try {
         const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3, relations: ['cart', 'cart.items', 'cart.items.product'] });
         if (customer) {
             const order = await store.create(EntityType.ORDER, { customer });
-            console.log(`===== Order created with ID: ${order.id} =====`)
-            console.log(`===== Order Items created: ${order.id} =====`)
+            logger.green(`===== Order created with ID: ${order.id} =====`)
+            logger.bgYellow(`===== Order Items created: ${order.id} =====`)
             for (const item of order) {
-                console.log(`\t ++++ Item: ID: ${item.id} ++++`)
+                logger.yellow(`\t ++++ Order Item ID: ${item.id} ++++`)
             }
         }
     } catch (error) {
-        console.log(`=== Order created FAILED ===, ${error}`)
+        logger.red(`=== Order created FAILED ===, ${error}`);
     }
 
     // TODO: completeOrder => add discounts, validate stock (from product.stock) and such ...
