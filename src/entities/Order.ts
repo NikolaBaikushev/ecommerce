@@ -1,9 +1,11 @@
-import { Collection, PrimaryGeneratedColumn, Column, Entity, OneToOne, ManyToOne } from "typeorm";
+import { Collection, PrimaryGeneratedColumn, Column, Entity, OneToOne, ManyToOne, OneToMany } from "typeorm";
 import { EntityType } from "../services/store";
 import { Customer } from "./Customer";
+import { OrderItem } from "./OrderItem";
 
 enum OrderStatus {
-
+    CREATED = 'created',
+    COMPLETED = 'completed'
 }
 
 type OrderSummary = Pick<Order, 'status' | 'total' | 'customer'>
@@ -16,12 +18,13 @@ export class Order {
     @Column('decimal')
     total: number
 
-    @Column({enum: OrderStatus})
+    @Column({enum: OrderStatus, default: OrderStatus.CREATED})
     status: OrderStatus
 
     @ManyToOne(() => Customer, customer => customer.orders)
     customer: Customer
 
-
+    @OneToMany(() => OrderItem, item => item.order, {cascade: true})
+    items: OrderItem[]
 
 }

@@ -5,20 +5,25 @@ import { Product } from "../entities/Product";
 import { AddToCart, CartService } from "./cart.service";
 import { CreateCustomerPayload, CustomerService } from "./customer.service";
 import { CreateProductPayload, ProductService } from "./product.service";
+import { CreateOrderPayload, OrderService } from "./order.service";
+import { Order } from "../entities/Order";
 
 export enum EntityType {
     PRODUCT,
     CUSTOMER,
+    ORDER,
 }
 
 type EntityMap = {
     [EntityType.PRODUCT]: Product,
     [EntityType.CUSTOMER]: Customer,
+    [EntityType.ORDER]: Order,
 }
 
 type CreatePayloadMap = {
     [EntityType.PRODUCT]: CreateProductPayload,
     [EntityType.CUSTOMER]: CreateCustomerPayload
+    [EntityType.ORDER]: CreateOrderPayload
 }
 
 
@@ -35,11 +40,13 @@ export class StoreManager {
     private constructor(
         private readonly productService: ProductService,
         private readonly customerService: CustomerService,
-        private readonly cartService: CartService) { }
+        private readonly cartService: CartService,
+        private readonly orderService: OrderService,
+    ) { }
 
     public static getInstance() {
         if (!this.#instance) {
-            this.#instance = new StoreManager(ProductService.getInstance(), CustomerService.getInstance(), CartService.getInstance());
+            this.#instance = new StoreManager(ProductService.getInstance(), CustomerService.getInstance(), CartService.getInstance(), OrderService.getInstance());
         }
         return this.#instance;
     }
@@ -51,6 +58,8 @@ export class StoreManager {
                 return await this.customerService.createCustomer(payload as CreateCustomerPayload) as Awaited<EntityMap[T]>;
             case EntityType.PRODUCT:
                 return await this.productService.createProduct(payload as CreateProductPayload) as Awaited<EntityMap[T]>;
+            case EntityType.ORDER:
+                return await this.orderService.createOrder(payload as CreateOrderPayload) as Awaited<EntityMap[T]>;
             default:
                 throw new Error('Invalid entity type');
         }
@@ -65,11 +74,12 @@ export class StoreManager {
                 return this.customerService.getCustomerById(payload) as Promise<EntityMap[T] | null>;
             case EntityType.PRODUCT:
                 return this.productService.getProductById(payload) as Promise<EntityMap[T] | null>;
+            case EntityType.ORDER:
+                // return this.orderService.getProductById(payload) as Promise<EntityMap[T] | null>;
             default:
                 return null;
         }
     }
-
 
     public async addToCart(payload: AddToCart): Promise<Cart> {
         return await this.cartService.addToCart(payload);

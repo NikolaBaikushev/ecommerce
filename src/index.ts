@@ -1,3 +1,4 @@
+import { Entity } from "typeorm";
 import { Customer } from "./entities/Customer";
 import { Product } from "./entities/Product";
 import { DatabaseManager } from "./services/database.service";
@@ -37,25 +38,41 @@ async function main() {
     //         const cart = await addToCart(store, customer, product);
     //         console.log(`===== Cart created with ID: ${cart.id} =====`)
     //         console.log(`===== Cart Items created: ${cart.id} =====`)
-    //         cart.items.forEach((c) => console.log(`==== ${c.id} ====`))
+    //         cart.items.forEach((c) => console.log(`\t ==== ${c.id} ====`))
     //     }
     // } catch (error) {
     //     console.log(`=== Cart created FAILED ===, ${error}`)
     // }
 
     // Already Existing customer!
+    // try {
+    //     const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3 });
+    //     const product = await store.getEntityById(EntityType.PRODUCT, { id: 2 })
+    //     if (customer && product) {
+    //         const cart = await addToCart(store, customer, product);
+    //         console.log(`===== Cart Items Count: ${cart.items.length} =====`)
+    //         console.log(`===== Cart Items created: ${cart.id} =====`)
+    //         cart.items.forEach((c) => console.log(`\t ==== ${c.id} ====`))
+    //     }
+    // } catch (error) {
+    //     console.log(`=== Cart created FAILED ===, ${error}`)
+    // }
+
     try {
-        const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3 });
-        const product = await store.getEntityById(EntityType.PRODUCT, { id: 2 })
-        if (customer && product) {
-            const cart = await addToCart(store, customer, product);
-            console.log(`===== Cart Items Count: ${cart.items.length} =====`)
-            console.log(`===== Cart Items created: ${cart.id} =====`)
-            cart.items.forEach((c) => console.log(`==== ${c.id} ====`))
+        const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3, relations: ['cart', 'cart.items', 'cart.items.product'] });
+        if (customer) {
+            const order = await store.create(EntityType.ORDER, { customer });
+            console.log(`===== Order created with ID: ${order.id} =====`)
+            console.log(`===== Order Items created: ${order.id} =====`)
+            order.items.forEach((o) => console.log(`\t ==== ${o.id} ====`))
+            // TODO: Here the order is created 
         }
     } catch (error) {
-        console.log(`=== Cart created FAILED ===, ${error}`)
+        console.log(`=== Order created FAILED ===, ${error}`)
     }
+
+    // TODO: completeOrder => add discounts, validate stock (from product.stock) and such ...
+    // TODO: Change status to completed,
 }
 
 main();
