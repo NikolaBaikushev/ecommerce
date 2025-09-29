@@ -3,7 +3,8 @@ import { DatabaseManager } from "./database.service";
 
 export type CreateProductPayload = {
     name: string,
-    price: number
+    price: number,
+    description?: string
 }
 
 export class ProductService {
