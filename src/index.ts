@@ -64,8 +64,9 @@ async function main() {
             const order = await store.create(EntityType.ORDER, { customer });
             console.log(`===== Order created with ID: ${order.id} =====`)
             console.log(`===== Order Items created: ${order.id} =====`)
-            order.items.forEach((o) => console.log(`\t ==== ${o.id} ====`))
-            // TODO: Here the order is created 
+            for (const item of order) {
+                console.log(`\t ++++ Item: ID: ${item.id} ++++`)
+            }
         }
     } catch (error) {
         console.log(`=== Order created FAILED ===, ${error}`)

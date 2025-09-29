@@ -27,4 +27,14 @@ export class Order {
     @OneToMany(() => OrderItem, item => item.order, {cascade: true})
     items: OrderItem[]
 
+    *[Symbol.iterator](): Generator<Omit<OrderItem, 'order'>> {
+        for (const item of this.items) {
+            yield {
+                id: item.id,
+                quantity: item.quantity,
+                product: item.product,
+            }
+        }
+    }
+
 }
