@@ -1,6 +1,10 @@
 import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
 
+export type CreateProductPayload = {
+    name: string,
+    price: number
+}
 
 export class ProductService {
     private static instance: ProductService;
@@ -16,12 +20,9 @@ export class ProductService {
         return this.instance;
     }
 
-    async createProduct(): Promise<Product> {
+    async createProduct(payload: CreateProductPayload): Promise<Product> {
         const repository = DatabaseManager.getRepository(Product)
-        const product: Product = repository.create({
-            name: 'Product Test',
-            price: 1.50
-        })
+        const product: Product = repository.create(payload);
 
         return repository.save(product);
     }

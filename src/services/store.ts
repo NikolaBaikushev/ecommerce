@@ -1,7 +1,7 @@
 import { Customer } from "../entities/Customer";
 import { Product } from "../entities/Product";
-import { CustomerService } from "./customer.service";
-import { ProductService } from "./product.service";
+import { CreateCustomerPayload, CustomerService } from "./customer.service";
+import { CreateProductPayload, ProductService } from "./product.service";
 
 export enum EntityType {
     PRODUCT,
@@ -12,6 +12,13 @@ type EntityMap = {
     [EntityType.PRODUCT]: Product,
     [EntityType.CUSTOMER]: Customer,
 }
+
+type CreatePayloadMap = {
+    [EntityType.PRODUCT]: CreateProductPayload,
+    [EntityType.CUSTOMER]: CreateCustomerPayload
+}
+
+
 
 export class StoreManager {
     static #instance: StoreManager;
@@ -28,12 +35,12 @@ export class StoreManager {
     }
 
 
-    public async create<T extends EntityType>(entityType: T): Promise<Awaited<EntityMap[T]>> {
+    public async create<T extends EntityType>(entityType: T, payload: CreatePayloadMap[T]): Promise<Awaited<EntityMap[T]>> {
         switch (entityType) {
             case EntityType.CUSTOMER:
-                return await this.customerService.createCustomer() as Awaited<EntityMap[T]>;
+                return await this.customerService.createCustomer(payload as CreateCustomerPayload) as Awaited<EntityMap[T]>;
             case EntityType.PRODUCT:
-                return await this.productService.createProduct() as Awaited<EntityMap[T]>;
+                return await this.productService.createProduct(payload as CreateProductPayload) as Awaited<EntityMap[T]>;
             default:
                 throw new Error('Invalid entity type');
         }

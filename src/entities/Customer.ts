@@ -9,7 +9,7 @@ export class Customer {
     @Column()
     name: string
 
-    @Column()
+    @Column({ type: 'boolean', default: false, nullable: false})
     isPremium: boolean
 
     @OneToMany(() => Order, order => order.customer)
