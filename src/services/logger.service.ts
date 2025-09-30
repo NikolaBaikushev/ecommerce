@@ -39,7 +39,7 @@ export class Logger {
     }
 
     @WrapWithConsoleLog
-    error(message: string) {
+    fail(message: string) {
         return chalk.red(message)
     }
 

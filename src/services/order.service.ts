@@ -75,15 +75,15 @@ export class OrderService {
         for (const [id, total] of productQuantities.entries()) {
             const product = await this.productService.getProductById({id});
             if (!product) {
-                this.logger.error(`Product with ID ${id} was not found. Skipping...`);
+                this.logger.fail(`Product with ID ${id} was not found. Skipping...`);
                 continue
             }
 
             if (product.stock >= total) {
                 await this.productService.updateProduct({ id: id, stock: product.stock - total})
             } else {
-                this.logger.error(`Product "${product.name}" with ID: ${product.id} has insufficient stock!`)
-                this.logger.error(`== Current Stock: ${product.stock} - Stock to Buy: ${total}`)
+                this.logger.fail(`Product "${product.name}" with ID: ${product.id} has insufficient stock!`)
+                this.logger.fail(`== Current Stock: ${product.stock} - Stock to Buy: ${total}`)
                 continue
             }
         }
@@ -100,7 +100,7 @@ export class OrderService {
 
 
     private applyDiscount(total: number, discountPercent: number): number {
-        return total * (1 - discountPercent / 100);
+        return Number((total * (1 - discountPercent / 100)).toFixed(2));
     }
 
     // TODO: Do the same for the other service nad entities, use typescript ...

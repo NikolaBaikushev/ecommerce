@@ -13,6 +13,8 @@ enum Operations {
 
 }
 
+
+
 async function main() {
     let customer: Customer | null = null;
     let product: Product | null = null;
@@ -23,14 +25,14 @@ async function main() {
         await DatabaseManager.getInstance().initialize();
         logger.success('===== Database successfully connected =====')
     } catch (error) {
-        logger.error(`=== Database connection FAILED, ${error} ===`)
+        logger.fail(`=== Database connection FAILED, ${error} ===`)
     }
 
     // try {
     //     product = await createProduct(store);
-    //     logger.green(`===== Product created with ID: ${product.id} =====`)
+    //     logger.success(`===== Product created with ID: ${product.id} =====`)
     // } catch (error) {
-    //     logger.red(`=== Product created FAILED ===, ${error}`)
+    //     logger.error(`=== Product created FAILED ===, ${error}`)
     // }
 
     // try {
@@ -70,19 +72,21 @@ async function main() {
     //     logger.red(`=== Cart created FAILED ===, ${error}`)
     // }
 
-    // try {
-    //     const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3, relations: ['cart', 'cart.items', 'cart.items.product'] });
-    //     if (customer) {
-    //         const order = await store.create(EntityType.ORDER, { customer });
-    //         logger.green(`===== Order created with ID: ${order.id} =====`)
-    //         logger.bgYellow(`===== Order Items created: ${order.id} =====`)
-    //         for (const item of order) {
-    //             logger.yellow(`\t ++++ Order Item ID: ${item.id} ++++`)
-    //         }
-    //     }
-    // } catch (error) {
-    //     logger.red(`=== Order created FAILED ===, ${error}`);
-    // }
+    try {
+        // const id = 3;
+        const id = 5;
+        const customer = await store.getEntityById(EntityType.CUSTOMER, { id: id, relations: ['cart', 'cart.items', 'cart.items.product'] });
+        if (customer) {
+            const order = await store.create(EntityType.ORDER, { customer });
+            logger.success(`===== Order created with ID: ${order.id} =====`)
+            logger.bgYellow(`===== ITEMS: =====`)
+            for (const item of order) {
+                logger.yellow(`\t ++++ Order Item ID: ${item.id} ++++`)
+            }
+        }
+    } catch (error) {
+        logger.fail(`=== Order created FAILED ===, ${error}`);
+    }
 
     // logger.green('Operation Restock!')
     // try {
@@ -102,21 +106,21 @@ async function main() {
 
     // }
 
-    try {
-        const id = 1;
+    // try {
+    //     const id = 1;
 
-        logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} STARTED ===`)
+    //     logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} STARTED ===`)
         
-        const order = await store.getEntityById(EntityType.ORDER, { id: id, relations:['items', 'items.product']});
-        if (!order) {
-            throw new Error(`Order with ID: ${id} Not Found`)
-        }
-        await store.completeOrder(order);
-        logger.success(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED  ===`)
-    } catch (error: any) {
-        logger.error(`=== Operation: ${Operations.COMPLETE_ORDER} FAILED === `)
-        logger.error(`=== Message: ${error.message} ===` )
-    }
+    //     const order = await store.getEntityById(EntityType.ORDER, { id: id, relations:['items', 'items.product']});
+    //     if (!order) {
+    //         throw new Error(`Order with ID: ${id} Not Found`)
+    //     }
+    //     await store.completeOrder(order);
+    //     logger.success(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED  ===`)
+    // } catch (error: any) {
+    //     logger.error(`=== Operation: ${Operations.COMPLETE_ORDER} FAILED === `)
+    //     logger.error(`=== Message: ${error.message} ===` )
+    // }
 }
 
 main();
