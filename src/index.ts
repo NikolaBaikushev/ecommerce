@@ -58,10 +58,22 @@ async function addToCart(store: StoreManager, customer: Customer, product: Produ
 
 class App {
     static #instance: App;
-    logger = Logger.getInstance();
+    private logger: Logger = Logger.getInstance();
 
-
-    private constructor(){}
+    private constructor() {
+        const prototype = Object.getPrototypeOf(this);
+        // NOTE: In Order the OnEvent to work we have to add the "logger" property to the prototype (see: OnEvent implementation NOTE)
+        // NOTE: Or use the Logger.getInstance().success - which is not bound to the App class or its prototype...
+        // NOTE: Also done for practicising ...
+        if (!prototype.hasOwnProperty('logger')) {
+            Object.defineProperty(prototype, 'logger', {
+                value: Logger.getInstance(),
+                writable: false,
+                configurable: false,
+                enumerable: false,
+            });
+        }
+    }
 
     public static getInstance() {
         if (!this.#instance) {

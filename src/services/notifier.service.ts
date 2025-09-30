@@ -69,6 +69,7 @@ export function registerEventHandlers() {
     const notifier = Notifier.getInstance();
 
     for (const { eventName, target, methodName } of eventHandlers) {
+        // NOTE: Target is the prototype so it doesn't have instance properties.
         const handler = target[methodName].bind(target);
 
         notifier.subscribe(eventName, handler);

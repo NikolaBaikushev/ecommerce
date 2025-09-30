@@ -10,7 +10,7 @@ export class DatabaseManager {
 
     private constructor() { }
 
-    // @Notify(SuccessEventName.DATABASE_INITIALIZED, ErrorEventName.ERROR_DATABASE_INITIALIZED)
+    @Notify(SuccessEventName.DATABASE_INITIALIZED, ErrorEventName.ERROR_DATABASE_INITIALIZED)
     public async initialize(): Promise<void> {
         if (!AppDataSource.isInitialized) {
             await AppDataSource.initialize();
