@@ -2,6 +2,7 @@ import { UpdateResult } from "typeorm";
 import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
 import { GetPayload } from "./store";
+import { ErrorEventName, Notifier, Notify, SuccessEventName } from "./notifier.service";
 
 export type CreateProductPayload = {
     name: string,
@@ -9,6 +10,7 @@ export type CreateProductPayload = {
     description?: string,
     stock?: number
 }
+
 
 export type UpdateProductPayload = Partial<Product> & {id: number};
 
@@ -34,11 +36,12 @@ export class ProductService {
         })
     }
 
+    @Notify(SuccessEventName.PRODUCT_CREATED, ErrorEventName.ERROR_PRODUCT_CREATED)
     async createProduct(payload: CreateProductPayload): Promise<Product> {
         const repository = DatabaseManager.getRepository(Product)
         const product: Product = repository.create(payload);
-
-        return repository.save(product);
+        const savedProduct = await repository.save(product);
+        return savedProduct;
     }
 
 
