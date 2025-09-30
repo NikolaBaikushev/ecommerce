@@ -29,7 +29,7 @@ export class Logger {
     }
 
     @WrapWithConsoleLog
-    green(message: string) {
+    success(message: string) {
         return chalk.green(message)
     }
 
@@ -39,13 +39,18 @@ export class Logger {
     }
 
     @WrapWithConsoleLog
-    red(message: string) {
+    error(message: string) {
         return chalk.red(message)
     }
 
     @WrapWithConsoleLog
     bgYellow(message: string) {
         return chalk.bgYellow(message)
+    }
+
+    @WrapWithConsoleLog
+    neutral(message: string) {
+        return chalk.bgGrey(message)
     }
 
 }

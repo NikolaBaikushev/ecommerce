@@ -3,7 +3,7 @@ import { EntityType } from "../services/store";
 import { Customer } from "./Customer";
 import { OrderItem } from "./OrderItem";
 
-enum OrderStatus {
+export enum OrderStatus {
     CREATED = 'created',
     COMPLETED = 'completed'
 }

@@ -1,4 +1,4 @@
-import { Entity, UpdateStatement } from "typeorm";
+import { Entity, EntityNotFoundError, UpdateStatement } from "typeorm";
 import { Customer } from "./entities/Customer";
 import { Product } from "./entities/Product";
 import { DatabaseManager } from "./services/database.service";
@@ -6,7 +6,12 @@ import { EntityType, StoreManager } from "./services/store";
 import chalk from 'chalk';
 import { Logger } from "./services/logger.service";
 import { UpdateProductPayload } from "./services/product.service";
+import { Order } from "./entities/Order";
 
+enum Operations {
+    COMPLETE_ORDER = 'Complete Order',
+
+}
 
 async function main() {
     let customer: Customer | null = null;
@@ -16,9 +21,9 @@ async function main() {
     const logger = Logger.getInstance();
     try {
         await DatabaseManager.getInstance().initialize();
-        logger.green('===== Database successfully connected =====')
+        logger.success('===== Database successfully connected =====')
     } catch (error) {
-        logger.red(`=== Database connection FAILED, ${error} ===`)
+        logger.error(`=== Database connection FAILED, ${error} ===`)
     }
 
     // try {
@@ -97,8 +102,21 @@ async function main() {
 
     // }
 
-    // TODO: completeOrder => add discounts, validate stock (from product.stock) and such ...
-    // TODO: Change status to completed,
+    try {
+        const id = 1;
+
+        logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} STARTED ===`)
+        
+        const order = await store.getEntityById(EntityType.ORDER, { id: id, relations:['items', 'items.product']});
+        if (!order) {
+            throw new Error(`Order with ID: ${id} Not Found`)
+        }
+        await store.completeOrder(order);
+        logger.success(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED  ===`)
+    } catch (error: any) {
+        logger.error(`=== Operation: ${Operations.COMPLETE_ORDER} FAILED === `)
+        logger.error(`=== Message: ${error.message} ===` )
+    }
 }
 
 main();

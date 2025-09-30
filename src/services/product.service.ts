@@ -26,13 +26,6 @@ export class ProductService {
         return this.instance;
     }
 
-    async createProduct(payload: CreateProductPayload): Promise<Product> {
-        const repository = DatabaseManager.getRepository(Product)
-        const product: Product = repository.create(payload);
-
-        return repository.save(product);
-    }
-
     async getProductById(payload: GetPayload): Promise<Product | null> {
         const repository = DatabaseManager.getRepository(Product);
         return repository.findOne({
@@ -40,6 +33,14 @@ export class ProductService {
             relations: [...(payload?.relations ?? [])]
         })
     }
+
+    async createProduct(payload: CreateProductPayload): Promise<Product> {
+        const repository = DatabaseManager.getRepository(Product)
+        const product: Product = repository.create(payload);
+
+        return repository.save(product);
+    }
+
 
     async updateProduct(payload: UpdateProductPayload): Promise<UpdateResult> {
         return DatabaseManager.getRepository(Product).update({ id: payload.id } , payload);

@@ -92,7 +92,7 @@ export class StoreManager {
             case EntityType.PRODUCT:
                 return this.productService.getProductById(payload) as Promise<EntityMap[T] | null>;
             case EntityType.ORDER:
-                // return this.orderService.getProductById(payload) as Promise<EntityMap[T] | null>;
+                return this.orderService.getOrderById(payload) as Promise<EntityMap[T] | null>;
             default:
                 return null;
         }
@@ -100,5 +100,9 @@ export class StoreManager {
 
     public async addToCart(payload: AddToCart): Promise<Cart> {
         return await this.cartService.addToCart(payload);
+    }
+
+    public async completeOrder(order: Order) {
+        return await this.orderService.completeOrder(order);
     }
 }
