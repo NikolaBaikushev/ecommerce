@@ -7,6 +7,7 @@ import { DatabaseManager } from "./database.service";
 import { Logger } from "./logger.service";
 import { ProductService } from "./product.service";
 import { GetPayload } from "./store";
+import { ErrorEventName, Notify, SuccessEventName } from "./notifier.service";
 
 export type CreateOrderPayload = {
     customer: Customer
@@ -38,6 +39,7 @@ export class OrderService {
         })
     }
 
+    @Notify(SuccessEventName.ORDER_CREATED, ErrorEventName.ERROR_ORDER_CREATED)
     async createOrder(payload: CreateOrderPayload): Promise<Order> {
         const cart = payload.customer.cart;
 

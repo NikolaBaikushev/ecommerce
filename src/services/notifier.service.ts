@@ -5,16 +5,28 @@ type SubscriberFunction = (...params: any[]) => any
 export enum SuccessEventName {
     PRODUCT_CREATED = 'product.created',
     DATABASE_INITIALIZED = 'db.init',
+    CUSTOMER_CREATED = 'customer.created',
+    CART_CREATED = 'cart.created',
+    ORDER_CREATED = 'order.created',
+    PRODUCT_UPDATED = 'product.restock',
 }
 
 export enum ErrorEventName {
     ERROR_PRODUCT_CREATED = 'error.product.created',
     ERROR_DATABASE_INITIALIZED = 'error.db.init',
+    ERROR_CUSTOMER_CREATED = 'error.customer.created',
+    ERROR_CART_CREATED = 'error.cart.created',
+    ERROR_ORDER_CREATED = 'error.order.created',
+    ERROR_PRODUCT_UPDATED = 'error.product.restock',
 }
 
 type EventToErrorMap = {
     [SuccessEventName.PRODUCT_CREATED]: ErrorEventName.ERROR_PRODUCT_CREATED;
     [SuccessEventName.DATABASE_INITIALIZED]: ErrorEventName.ERROR_DATABASE_INITIALIZED;
+    [SuccessEventName.CUSTOMER_CREATED]: ErrorEventName.ERROR_CUSTOMER_CREATED;
+    [SuccessEventName.CART_CREATED]: ErrorEventName.ERROR_CART_CREATED;
+    [SuccessEventName.ORDER_CREATED]: ErrorEventName.ERROR_ORDER_CREATED;
+    [SuccessEventName.PRODUCT_UPDATED]: ErrorEventName.ERROR_PRODUCT_UPDATED;
 };
 
 type NotifyEvent = SuccessEventName | ErrorEventName

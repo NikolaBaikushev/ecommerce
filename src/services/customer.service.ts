@@ -1,6 +1,7 @@
 import { Customer } from "../entities/Customer";
 import { Order } from "../entities/Order";
 import { DatabaseManager } from "./database.service";
+import { ErrorEventName, Notify, SuccessEventName } from "./notifier.service";
 import { GetPayload } from "./store";
 
 export type CreateCustomerPayload = {
@@ -30,6 +31,7 @@ export class CustomerService {
         })
     }
 
+    @Notify(SuccessEventName.CUSTOMER_CREATED, ErrorEventName.ERROR_CUSTOMER_CREATED)
     createCustomer(payload: CreateCustomerPayload) {
         const repository = DatabaseManager.getRepository(Customer)
         const customer: Customer = repository.create(payload);

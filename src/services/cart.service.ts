@@ -4,6 +4,7 @@
     import { Order } from "../entities/Order";
     import { Product } from "../entities/Product";
     import { DatabaseManager } from "./database.service";
+import { ErrorEventName, Notify, SuccessEventName } from "./notifier.service";
 
     export type AddToCart = {
         customer: Customer,
@@ -24,6 +25,7 @@
             return this.instance;
         }
 
+        @Notify(SuccessEventName.CART_CREATED, ErrorEventName.ERROR_CART_CREATED)
         async addToCart(payload: AddToCart): Promise<Cart> {
             const repository = DatabaseManager.getRepository(Cart);
             let cart = await repository.findOne({
@@ -32,9 +34,9 @@
             });
 
             if (!cart) {
-            cart = new Cart(); 
-            cart.customer = payload.customer;
-            cart.items = []
+                cart = new Cart(); 
+                cart.customer = payload.customer;
+                cart.items = []
             }
             
             const cartItem = DatabaseManager.getRepository(CartItem).create({

@@ -45,8 +45,13 @@ export class ProductService {
     }
 
 
+    @Notify(SuccessEventName.PRODUCT_UPDATED, ErrorEventName.ERROR_PRODUCT_UPDATED)
     async updateProduct(payload: UpdateProductPayload): Promise<UpdateResult> {
-        return DatabaseManager.getRepository(Product).update({ id: payload.id } , payload);
+        const beforeProduct = this.getProductById({id: payload.id});
+
+        const update = DatabaseManager.getRepository(Product).update({ id: payload.id } , payload);
+        const afterProduct = this.getProductById({id: payload.id});
+        return update;
     }
 }
 
