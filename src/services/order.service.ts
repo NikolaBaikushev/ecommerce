@@ -25,11 +25,16 @@ export class OrderService {
 
     async createOrder(payload: CreateOrderPayload): Promise<Order> {
         const cart = payload.customer.cart;
-        
+
         const order = DatabaseManager.getRepository(Order).create({
             customer: payload.customer,
             total: cart.totalPrice,
         })
+
+        if (payload.customer.isPremium) {
+            order.total = this.applyDiscount(order.total, 20); 
+        }
+
         order.items = cart.items.map(cartItem => {
             const orderItem = new OrderItem();
             orderItem.product = cartItem.product;
@@ -38,6 +43,13 @@ export class OrderService {
         })
 
         return await DatabaseManager.getRepository(Order).save(order);
+    }
+
+    
+
+
+    private applyDiscount(total: number, discountPercent: number): number {
+        return total * (1 - discountPercent / 100);
     }
 }
 

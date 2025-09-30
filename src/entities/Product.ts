@@ -14,7 +14,7 @@ export class Product {
     @Column({nullable: true})
     description: string
 
-    // @Column()
-    // stock: number
+    @Column({default:0})
+    stock: number
     
 }

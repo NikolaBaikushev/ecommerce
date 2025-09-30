@@ -1,10 +1,10 @@
-import { Entity } from "typeorm";
+import { Entity, UpdateResult } from "typeorm";
 import { Cart } from "../entities/Cart";
 import { Customer } from "../entities/Customer";
 import { Product } from "../entities/Product";
 import { AddToCart, CartService } from "./cart.service";
 import { CreateCustomerPayload, CustomerService } from "./customer.service";
-import { CreateProductPayload, ProductService } from "./product.service";
+import { CreateProductPayload, ProductService, UpdateProductPayload } from "./product.service";
 import { CreateOrderPayload, OrderService } from "./order.service";
 import { Order } from "../entities/Order";
 
@@ -24,6 +24,11 @@ type CreatePayloadMap = {
     [EntityType.PRODUCT]: CreateProductPayload,
     [EntityType.CUSTOMER]: CreateCustomerPayload
     [EntityType.ORDER]: CreateOrderPayload
+}
+type UpdatePayloadMap = {
+    [EntityType.PRODUCT]: UpdateProductPayload,
+    [EntityType.CUSTOMER]: undefined,
+    [EntityType.ORDER]: undefined
 }
 
 
@@ -60,6 +65,18 @@ export class StoreManager {
                 return await this.productService.createProduct(payload as CreateProductPayload) as Awaited<EntityMap[T]>;
             case EntityType.ORDER:
                 return await this.orderService.createOrder(payload as CreateOrderPayload) as Awaited<EntityMap[T]>;
+            default:
+                throw new Error('Invalid entity type');
+        }
+    }
+    public async update<T extends EntityType>(entityType: T, payload: UpdatePayloadMap[T]): Promise<UpdateResult> {
+        switch (entityType) {
+            // case EntityType.CUSTOMER:
+            //     return await this.customerService.createCustomer(payload as CreateCustomerPayload) as Awaited<EntityMap[T]>;
+            case EntityType.PRODUCT:
+                return await this.productService.updateProduct( payload as UpdateProductPayload) as any
+            // case EntityType.ORDER:
+            //     return await this.orderService.createOrder(payload as CreateOrderPayload) as Awaited<EntityMap[T]>;
             default:
                 throw new Error('Invalid entity type');
         }

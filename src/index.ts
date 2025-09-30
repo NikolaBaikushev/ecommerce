@@ -1,10 +1,11 @@
-import { Entity } from "typeorm";
+import { Entity, UpdateStatement } from "typeorm";
 import { Customer } from "./entities/Customer";
 import { Product } from "./entities/Product";
 import { DatabaseManager } from "./services/database.service";
 import { EntityType, StoreManager } from "./services/store";
 import chalk from 'chalk';
 import { Logger } from "./services/logger.service";
+import { UpdateProductPayload } from "./services/product.service";
 
 
 async function main() {
@@ -64,19 +65,37 @@ async function main() {
     //     logger.red(`=== Cart created FAILED ===, ${error}`)
     // }
 
-    try {
-        const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3, relations: ['cart', 'cart.items', 'cart.items.product'] });
-        if (customer) {
-            const order = await store.create(EntityType.ORDER, { customer });
-            logger.green(`===== Order created with ID: ${order.id} =====`)
-            logger.bgYellow(`===== Order Items created: ${order.id} =====`)
-            for (const item of order) {
-                logger.yellow(`\t ++++ Order Item ID: ${item.id} ++++`)
-            }
-        }
-    } catch (error) {
-        logger.red(`=== Order created FAILED ===, ${error}`);
-    }
+    // try {
+    //     const customer = await store.getEntityById(EntityType.CUSTOMER, { id: 3, relations: ['cart', 'cart.items', 'cart.items.product'] });
+    //     if (customer) {
+    //         const order = await store.create(EntityType.ORDER, { customer });
+    //         logger.green(`===== Order created with ID: ${order.id} =====`)
+    //         logger.bgYellow(`===== Order Items created: ${order.id} =====`)
+    //         for (const item of order) {
+    //             logger.yellow(`\t ++++ Order Item ID: ${item.id} ++++`)
+    //         }
+    //     }
+    // } catch (error) {
+    //     logger.red(`=== Order created FAILED ===, ${error}`);
+    // }
+
+    // logger.green('Operation Restock!')
+    // try {
+    //     // restock
+    //     const product = await store.getEntityById(EntityType.PRODUCT, { id:2});
+    //     if (product) {
+    //         logger.bgYellow(`==== Previous Stock: ${product.stock}`);
+    //         const updatePayload: UpdateProductPayload = {
+    //             id: product.id,
+    //             stock: product.stock + 15,
+    //         }
+    //         await store.update(EntityType.PRODUCT, updatePayload);
+    //         const updatedProduct = await store.getEntityById(EntityType.PRODUCT, {id: 2})
+    //         logger.bgYellow(`==== After Restock: ${updatedProduct!.stock}`);
+    //     }
+    // }catch(error){
+
+    // }
 
     // TODO: completeOrder => add discounts, validate stock (from product.stock) and such ...
     // TODO: Change status to completed,
@@ -88,9 +107,11 @@ main();
 
 async function createProduct(store: StoreManager) {
     try {
+        // TODO: add stock;
         const product = await store.create(EntityType.PRODUCT, {
             name: `Product ${Math.floor(Math.random() * 1000)}`,
-            price: Math.round((1 + Math.random() * 99) * 100) / 100
+            price: Math.round((1 + Math.random() * 99) * 100) / 100,
+            
         });
         return product
     } catch (error) {

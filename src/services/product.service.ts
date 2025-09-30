@@ -1,3 +1,4 @@
+import { UpdateResult } from "typeorm";
 import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
 import { GetPayload } from "./store";
@@ -5,8 +6,11 @@ import { GetPayload } from "./store";
 export type CreateProductPayload = {
     name: string,
     price: number,
-    description?: string
+    description?: string,
+    stock?: number
 }
+
+export type UpdateProductPayload = Partial<Product> & {id: number};
 
 export class ProductService {
     private static instance: ProductService;
@@ -35,6 +39,10 @@ export class ProductService {
             where: { id: payload.id },
             relations: [...(payload?.relations ?? [])]
         })
+    }
+
+    async updateProduct(payload: UpdateProductPayload): Promise<UpdateResult> {
+        return DatabaseManager.getRepository(Product).update({ id: payload.id } , payload);
     }
 }
 
