@@ -34,6 +34,11 @@ export class Logger {
     }
 
     @WrapWithConsoleLog
+    bgSuccess(message: string) {
+        return chalk.bgGreenBright(message)
+    }
+
+    @WrapWithConsoleLog
     yellow(message:string) {
         return chalk.yellow(message)
     }
@@ -41,6 +46,10 @@ export class Logger {
     @WrapWithConsoleLog
     fail(message: string) {
         return chalk.red(message)
+    }
+    @WrapWithConsoleLog
+    bgFail(message: string) {
+        return chalk.bgRed(message)
     }
 
     @WrapWithConsoleLog
