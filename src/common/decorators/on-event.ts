@@ -1,13 +1,9 @@
+import { EventHandler } from "../../services/event-handler.service";
 import { Notifier } from "../../services/notifier.service";
 import { NotifyEvent } from "../events/notify-events";
+import { DECORATED_CLASSES, EVENT_HANDLERS } from "../helpers/register-event-handler-helpers";
 
 
-
-const EVENT_HANDLERS: Array<{
-  eventName: NotifyEvent;
-  target: any;
-  methodName: string;
-}> = [];
 
 export function OnEvent(eventName: NotifyEvent) {
     return function (target: any, propertyKey: string, _descriptor: PropertyDescriptor) {
@@ -18,16 +14,8 @@ export function OnEvent(eventName: NotifyEvent) {
             target,
             methodName: propertyKey,
         });
+
+        DECORATED_CLASSES.add(target.constructor)
     };
-}
 
-export function RegisterEventHandlers() {
-    const notifier = Notifier.getInstance();
-
-    for (const { eventName, target, methodName } of EVENT_HANDLERS) {
-        // NOTE: Target is the prototype so it doesn't have instance properties.
-        const handler = target[methodName].bind(target);
-
-        notifier.subscribe(eventName, handler);
-    }
 }

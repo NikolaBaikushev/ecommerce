@@ -9,10 +9,13 @@ import { CreateOrderPayload } from "../common/types/order/request/create-order-p
 import { UpdateOrderPayload } from "../common/types/order/request/update-order-payload";
 import { CompleteOrderResponse } from "../common/types/order/response/complete-order-response";
 import { GetPayload } from "../common/types/domain/get";
+import { OnEvent } from "../common/decorators/on-event";
+import { Operations } from "./event-handler.service";
+import { Logger } from "./logger.service";
 
 export class OrderService {
     static #instance: OrderService;
-
+    private logger: Logger = Logger.getInstance();
     private constructor(private readonly database: DatabaseManager, private readonly productService: ProductService,) { }
 
     public static getInstance(): OrderService {
@@ -23,7 +26,7 @@ export class OrderService {
         return this.#instance;
     }
 
-    async getOrderById(payload: GetPayload): Promise<Order | null> {
+    public async getOrderById(payload: GetPayload): Promise<Order | null> {
         const repository = DatabaseManager.getRepository(Order);
         return repository.findOne({
             where: { id: payload.id },
@@ -32,7 +35,7 @@ export class OrderService {
     }
 
     @Notify(SuccessEventName.ORDER_CREATED, ErrorEventName.ERROR_ORDER_CREATED)
-    async createOrder(payload: CreateOrderPayload): Promise<Order> {
+    public async createOrder(payload: CreateOrderPayload): Promise<Order> {
         const cart = payload.customer.cart;
 
         const order = DatabaseManager.getRepository(Order).create({
@@ -56,7 +59,7 @@ export class OrderService {
 
 
     @Notify(SuccessEventName.ORDER_COMPLETED, ErrorEventName.ERROR_ORDER_COMPLETED)
-    async completeOrder(order: Order): Promise<CompleteOrderResponse> {
+    public async completeOrder(order: Order): Promise<CompleteOrderResponse> {
         if (order.status === OrderStatus.COMPLETED) {
             throw new Error('Order Already Completed!')
         }
@@ -103,17 +106,47 @@ export class OrderService {
     }
 
 
-    async updateOrder(payload: UpdateOrderPayload): Promise<UpdateResult> {
+    public async updateOrder(payload: UpdateOrderPayload): Promise<UpdateResult> {
         return DatabaseManager.getRepository(Order).update({ id: payload.id }, payload);
+    }
+
+
+
+    // TODO: Do the same for the other service nad entities, use typescript ...
+    public getOrderSummary() {
+
     }
 
     private applyDiscount(total: number, discountPercent: number): number {
         return Number((total * (1 - discountPercent / 100)).toFixed(2));
     }
 
-    // TODO: Do the same for the other service nad entities, use typescript ...
-    public getOrderSummary() {
 
+    @OnEvent(SuccessEventName.ORDER_CREATED)
+    handleOrderCreated(order: Order) {
+        this.logger.neutral(`=== OPERATION: ${Operations.CREATE_ORDER} FINISHED ===`)
+        this.logger.bgSuccess(`=== RESULT: Order created with ID: ${order.id} ===`)
+        this.logger.bgYellow(`=== RESULT ITEMS: ===`)
+        for (const item of order) {
+            this.logger.yellow(`\t +++ Order Item ID: ${item.id} +++`)
+        }
+    }
+
+    @OnEvent(ErrorEventName.ERROR_ORDER_CREATED)
+    handleOrderCreatedError(error: Error) {
+        this.logger.fail(`=== OPERATION: ${Operations.CREATE_ORDER} FAILED ===, ${error}`)
+    }
+
+    @OnEvent(SuccessEventName.ORDER_COMPLETED)
+    handleOrderCompleted(data: CompleteOrderResponse) {
+        this.logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED ===`);
+        this.logger.bgYellow(`=== RESULT STATUS BEFORE COMPLETION: ${data?.beforeCompleteOrder?.status}`)
+        this.logger.bgYellow(`=== RESULT STATUS AFTER COMPLETION: ${data?.afterCompleteOrder?.status}`)
+    }
+
+    @OnEvent(ErrorEventName.ERROR_ORDER_COMPLETED)
+    handleOrderCompletedError(error: Error) {
+        this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
     }
 }
 

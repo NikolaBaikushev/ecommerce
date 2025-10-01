@@ -1,6 +1,6 @@
 import { Customer } from "./entities/Customer";
 import { Product } from "./entities/Product";
-import { OnEvent, RegisterEventHandlers } from "./common/decorators/on-event";
+import { OnEvent } from "./common/decorators/on-event";
 import { Use } from "./common/decorators/use";
 import { SuccessEventName, ErrorEventName } from "./common/events/notify-events";
 import { EntityType } from "./common/types/domain/core";
@@ -12,21 +12,14 @@ import { DatabaseManager } from "./services/database.service";
 import { Logger } from "./services/logger.service";
 import { StoreManager } from "./services/store";
 import { Notifier } from "./services/notifier.service";
-enum Operations {
-    COMPLETE_ORDER = 'Complete Order',
-    CREATE_ORDER = 'Create Order',
-    CREATE_PRODUCT = 'Create Product',
-    CREATE_CUSTOMER = 'Create Customer',
-    ADD_TO_CART = 'Add To Cart',
-    RESTOCK = 'Restock',
-
-}
-
+import { Operations } from "./services/event-handler.service";
+import { RegisterEventHandlers } from "./common/decorators/register-event-handlers";
 
 
 
 class App {
-    private static instance: App;
+    static #instance: App;
+    
     private logger: Logger = Logger.getInstance();
     private manager: StoreManager = StoreManager.getInstance();
 
@@ -35,28 +28,13 @@ class App {
     private cart: Cart;
     private order: Order;
 
-    private constructor() {
-        const prototype = Object.getPrototypeOf(this);
-        // NOTE: In Order the OnEvent to work we have to add the "logger" property to the prototype (see: OnEvent implementation NOTE)
-        // NOTE: Or use the Logger.getInstance().success - which is not bound to the App class or its prototype...
-        // NOTE: Also done for practicising ...
-         
-        /* eslint-disable */
-        if (!prototype.hasOwnProperty('logger')) {
-            Object.defineProperty(prototype, 'logger', {
-                value: Logger.getInstance(),
-                writable: false,
-                configurable: false,
-                enumerable: false,
-            });
-        }
-    }
+    private constructor() {}
 
     public static getInstance() {
-        if (!this.instance) {
-            this.instance = new App();
+        if (!this.#instance) {
+            this.#instance = new App();
         }
-        return this.instance;
+        return this.#instance;
     }
 
     @OnEvent(SuccessEventName.DATABASE_INITIALIZED)
@@ -67,82 +45,6 @@ class App {
     @OnEvent(ErrorEventName.ERROR_DATABASE_INITIALIZED)
     handleDatabaseInitializeError(error: unknown) {
         this.logger.bgFail(`=== Database connection FAILED ===, ${error}`)
-    }
-
-    @OnEvent(SuccessEventName.PRODUCT_CREATED)
-    handleProductCreated(product: Product) {
-        this.logger.neutral(`=== OPERATION: ${Operations.CREATE_PRODUCT} FINISHED ===`)
-        this.logger.bgSuccess(`=== RESULT: Product created with ID: ${product.id} ===`)
-    }
-
-    @OnEvent(ErrorEventName.ERROR_PRODUCT_CREATED)
-    handleProductCreatedError(error: Error) {
-        this.logger.fail(`=== OPERATION: ${Operations.CREATE_PRODUCT} FAILED ===, ${error}`)
-    }
-
-    @OnEvent(SuccessEventName.CUSTOMER_CREATED)
-    handleCustomerCreated(customer: Customer) {
-        this.logger.neutral(`=== OPERATION: ${Operations.CREATE_CUSTOMER} FINISHED ===`)
-        this.logger.bgSuccess(`=== RESULT: Customer created with ID: ${customer.id} ===`)
-    }
-
-    @OnEvent(ErrorEventName.ERROR_CUSTOMER_CREATED)
-    handleCustomerCreatedError(error: Error) {
-        this.logger.fail(`=== OPERATION: ${Operations.CREATE_CUSTOMER} FAILED ===, ${error}`)
-    }
-
-    @OnEvent(SuccessEventName.CART_CREATED)
-    handleCartCreated(cart: Cart) {
-        this.logger.neutral(`=== OPERATION: ${Operations.ADD_TO_CART} FINISHED ===`)
-
-        this.logger.bgSuccess(`=== RESULT: Cart created with ID: ${cart.id} ===`)
-        this.logger.bgYellow(`=== RESULT ITEMS ===`)
-        for (const item of cart) {
-            this.logger.yellow(`\t +++ Cart Item ID: ${item.id} +++`)
-        }
-    }
-
-    @OnEvent(ErrorEventName.ERROR_CART_CREATED)
-    handleCartCreatedError(error: Error) {
-        this.logger.fail(`=== OPERATION: ${Operations.ADD_TO_CART} FAILED ===, ${error}`)
-    }
-
-    @OnEvent(SuccessEventName.ORDER_CREATED)
-    handleOrderCreated(order: Order) {
-        this.logger.neutral(`=== OPERATION: ${Operations.CREATE_ORDER} FINISHED ===`)
-        this.logger.bgSuccess(`=== RESULT: Order created with ID: ${order.id} ===`)
-        this.logger.bgYellow(`=== RESULT ITEMS: ===`)
-        for (const item of order) {
-            this.logger.yellow(`\t +++ Order Item ID: ${item.id} +++`)
-        }
-    }
-
-    @OnEvent(ErrorEventName.ERROR_ORDER_CREATED)
-    handleOrderCreatedError(error: Error) {
-        this.logger.fail(`=== OPERATION: ${Operations.CREATE_ORDER} FAILED ===, ${error}`)
-    }
-
-    @OnEvent(SuccessEventName.PRODUCT_RESTOCK)
-    handleProductRestock(data: ProductRestockResponse) {
-        this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} FINISHED ===`)
-        this.logger.bgYellow(`=== RESULT BEFORE RESTOCK: ${data?.beforeUpdateProduct?.stock} ===`);
-        this.logger.bgYellow(`=== RESULT AFTER RESTOCK: ${data?.afterUpdateProduct?.stock} ===`);
-    }
-
-    @OnEvent(ErrorEventName.ERROR_PRODUCT_RESTOCK)
-    handleProductRestockError(error: Error) {
-        this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
-    }
-    @OnEvent(SuccessEventName.ORDER_COMPLETED)
-    handleOrderCompleted(data: CompleteOrderResponse) {
-        this.logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED ===`);
-        this.logger.bgYellow(`=== RESULT STATUS BEFORE COMPLETION: ${data?.beforeCompleteOrder?.status}`)
-        this.logger.bgYellow(`=== RESULT STATUS AFTER COMPLETION: ${data?.afterCompleteOrder?.status}`)
-    }
-
-    @OnEvent(ErrorEventName.ERROR_ORDER_COMPLETED)
-    handleOrderCompletedError(error: Error) {
-        this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
     }
 
     @Use(RegisterEventHandlers)

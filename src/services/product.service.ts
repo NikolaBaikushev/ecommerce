@@ -7,10 +7,13 @@ import { CreateProductPayload } from "../common/types/product/request/create-pro
 import { UpdateProductPayload, UpdateProductRestockPayload } from "../common/types/product/request/update-product-payload";
 import { ProductRestockResponse } from "../common/types/product/response/product-restock-response";
 import { GetPayload } from "../common/types/domain/get";
-
+import { OnEvent } from "../common/decorators/on-event";
+import { Operations } from "./event-handler.service";
+import { Logger } from "./logger.service";
 
 export class ProductService {
     static #instance: ProductService;
+    private logger: Logger = Logger.getInstance();
 
     private constructor(private readonly database: DatabaseManager) { }
 
@@ -66,6 +69,31 @@ export class ProductService {
                 afterUpdateProduct: updatedProduct
             }
         }
+    }
+
+
+    @OnEvent(SuccessEventName.PRODUCT_CREATED)
+    handleProductCreated(product: Product) {
+        this.logger.neutral(`=== OPERATION: ${Operations.CREATE_PRODUCT} FINISHED ===`)
+        this.logger.bgSuccess(`=== RESULT: Product created with ID: ${product.id} ===`)
+    }
+
+    @OnEvent(ErrorEventName.ERROR_PRODUCT_CREATED)
+    handleProductCreatedError(error: Error) {
+        this.logger.fail(`=== OPERATION: ${Operations.CREATE_PRODUCT} FAILED ===, ${error}`)
+    }
+
+
+    @OnEvent(SuccessEventName.PRODUCT_RESTOCK)
+    handleProductRestock(data: ProductRestockResponse) {
+        this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} FINISHED ===`)
+        this.logger.bgYellow(`=== RESULT BEFORE RESTOCK: ${data?.beforeUpdateProduct?.stock} ===`);
+        this.logger.bgYellow(`=== RESULT AFTER RESTOCK: ${data?.afterUpdateProduct?.stock} ===`);
+    }
+
+    @OnEvent(ErrorEventName.ERROR_PRODUCT_RESTOCK)
+    handleProductRestockError(error: Error) {
+        this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
     }
 
 }
