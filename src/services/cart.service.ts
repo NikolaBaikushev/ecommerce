@@ -1,10 +1,11 @@
-    import { Cart } from "../entities/Cart";
+    import { Notify } from "../common/decorators/notify";
+import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
+import { Cart } from "../entities/Cart";
     import { CartItem } from "../entities/CartItem";
     import { Customer } from "../entities/Customer";
     import { Order } from "../entities/Order";
     import { Product } from "../entities/Product";
     import { DatabaseManager } from "./database.service";
-import { ErrorEventName, Notify, SuccessEventName } from "./notifier.service";
 
     export type AddToCart = {
         customer: Customer,
