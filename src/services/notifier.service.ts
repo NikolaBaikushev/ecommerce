@@ -8,7 +8,8 @@ export enum SuccessEventName {
     CUSTOMER_CREATED = 'customer.created',
     CART_CREATED = 'cart.created',
     ORDER_CREATED = 'order.created',
-    PRODUCT_UPDATED = 'product.restock',
+    PRODUCT_UPDATED = 'product.updated',
+    PRODUCT_RESTOCK = 'product.restock',
 }
 
 export enum ErrorEventName {
@@ -17,7 +18,8 @@ export enum ErrorEventName {
     ERROR_CUSTOMER_CREATED = 'error.customer.created',
     ERROR_CART_CREATED = 'error.cart.created',
     ERROR_ORDER_CREATED = 'error.order.created',
-    ERROR_PRODUCT_UPDATED = 'error.product.restock',
+    ERROR_PRODUCT_UPDATED = 'error.product.updated',
+    ERROR_PRODUCT_RESTOCK = 'error.product.restock',
 }
 
 type EventToErrorMap = {
@@ -27,6 +29,7 @@ type EventToErrorMap = {
     [SuccessEventName.CART_CREATED]: ErrorEventName.ERROR_CART_CREATED;
     [SuccessEventName.ORDER_CREATED]: ErrorEventName.ERROR_ORDER_CREATED;
     [SuccessEventName.PRODUCT_UPDATED]: ErrorEventName.ERROR_PRODUCT_UPDATED;
+    [SuccessEventName.PRODUCT_RESTOCK]: ErrorEventName.ERROR_PRODUCT_RESTOCK;
 };
 
 type NotifyEvent = SuccessEventName | ErrorEventName

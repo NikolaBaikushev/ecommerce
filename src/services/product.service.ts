@@ -53,5 +53,6 @@ export class ProductService {
         const afterProduct = this.getProductById({id: payload.id});
         return update;
     }
+
 }
 

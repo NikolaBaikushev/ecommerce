@@ -22,7 +22,10 @@ enum Operations {
 
 
 
-
+type ProductRestockResponse = {
+    beforeUpdateProduct: Product,
+    afterUpdateProduct: Product
+}
 
 
 class App {
@@ -122,14 +125,14 @@ class App {
 
     // TODO: This uses the update (which is general event) however it is only about stock ... 
     // TODO: Log the whole previous and after (and diff);
-    @OnEvent(SuccessEventName.PRODUCT_UPDATED)
-    handleProductRestock(beforeUpdateProduct: Product, afterUpdateProduct: Product) {
+    @OnEvent(SuccessEventName.PRODUCT_RESTOCK)
+    handleProductRestock(data: ProductRestockResponse) {
         this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} FINISHED ===`)
-        this.logger.bgYellow(`=== RESULT BEFORE RESTOCK: ${beforeUpdateProduct?.stock} ===`);
-        this.logger.bgYellow(`=== RESULT AFTER RESTOCK: ${afterUpdateProduct?.stock} ===`);
+        this.logger.bgYellow(`=== RESULT BEFORE RESTOCK: ${data?.beforeUpdateProduct?.stock} ===`);
+        this.logger.bgYellow(`=== RESULT AFTER RESTOCK: ${data?.afterUpdateProduct?.stock} ===`);
     }
 
-    @OnEvent(ErrorEventName.ERROR_PRODUCT_UPDATED)
+    @OnEvent(ErrorEventName.ERROR_PRODUCT_RESTOCK)
     handleProductRestockError(error: Error) {
         this.logger.fail(`=== OPERATION: ${Operations.RESTOCK} FAILED ===, ${error}`)
     }
@@ -148,9 +151,8 @@ class App {
             // this.cart = await this.addToCart();
             // this.cart = await this.addToCartWithCustomerAndProduct(3, 2); // customerId 3, productId 2;
             // this.order = await this.createOrder(3); // customerId 3 or 5
-            const [before, after] = await this.productRestock(2);
-            this.product = after;
-
+            const { afterUpdateProduct } = await this.productRestock(2);
+            this.product = afterUpdateProduct;
 
 
             // try {
@@ -265,8 +267,8 @@ class App {
         }
     }
 
-    @Notify(SuccessEventName.PRODUCT_UPDATED, ErrorEventName.ERROR_PRODUCT_UPDATED)
-    private async productRestock(productId: number): Promise<[Product, Product]> {
+    @Notify(SuccessEventName.PRODUCT_RESTOCK, ErrorEventName.ERROR_PRODUCT_RESTOCK)
+    private async productRestock(productId: number): Promise<ProductRestockResponse> {
         this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} STARTED ===`)
 
         try {
@@ -289,7 +291,10 @@ class App {
                 if (!updatedProduct) {
                     throw new Error(`Product with ID: ${productId} NOT FOUND!`)
                 }
-                return [product, updatedProduct];
+                return {
+                     beforeUpdateProduct: product,
+                    afterUpdateProduct: updatedProduct
+                }
             }
         } catch (error) {
             throw error;
