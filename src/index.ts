@@ -5,10 +5,11 @@ import { DatabaseManager } from "./services/database.service";
 import { EntityType, StoreManager } from "./services/store";
 import chalk from 'chalk';
 import { Logger } from "./services/logger.service";
-import { UpdateProductPayload } from "./services/product.service";
+import { ProductRestockResponse, UpdateProductPayload } from "./services/product.service";
 import { Order } from "./entities/Order";
 import { ErrorEventName, Notifier, Notify, OnEvent, registerEventHandlers, SuccessEventName, Use } from "./services/notifier.service";
 import { Cart } from "./entities/Cart";
+import { CompleteOrderResponse } from "./services/order.service";
 
 enum Operations {
     COMPLETE_ORDER = 'Complete Order',
@@ -21,11 +22,6 @@ enum Operations {
 }
 
 
-
-type ProductRestockResponse = {
-    beforeUpdateProduct: Product,
-    afterUpdateProduct: Product
-}
 
 
 class App {
@@ -123,8 +119,6 @@ class App {
         this.logger.fail(`=== OPERATION: ${Operations.CREATE_ORDER} FAILED ===, ${error}`)
     }
 
-    // TODO: This uses the update (which is general event) however it is only about stock ... 
-    // TODO: Log the whole previous and after (and diff);
     @OnEvent(SuccessEventName.PRODUCT_RESTOCK)
     handleProductRestock(data: ProductRestockResponse) {
         this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} FINISHED ===`)
@@ -134,7 +128,18 @@ class App {
 
     @OnEvent(ErrorEventName.ERROR_PRODUCT_RESTOCK)
     handleProductRestockError(error: Error) {
-        this.logger.fail(`=== OPERATION: ${Operations.RESTOCK} FAILED ===, ${error}`)
+        this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
+    }
+    @OnEvent(SuccessEventName.ORDER_COMPLETED)
+    handleOrderCompleted(data: CompleteOrderResponse) {
+        this.logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED ===`);
+        this.logger.bgYellow(`=== RESULT STATUS BEFORE COMPLETION: ${data?.beforeCompleteOrder?.status}`)
+        this.logger.bgYellow(`=== RESULT STATUS AFTER COMPLETION: ${data?.afterCompleteOrder?.status}`)
+    }
+
+    @OnEvent(ErrorEventName.ERROR_ORDER_COMPLETED)
+    handleOrderCompletedError(error: Error) {
+        this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
     }
 
     @Use(registerEventHandlers)
@@ -151,39 +156,17 @@ class App {
             // this.cart = await this.addToCart();
             // this.cart = await this.addToCartWithCustomerAndProduct(3, 2); // customerId 3, productId 2;
             // this.order = await this.createOrder(3); // customerId 3 or 5
-            const { afterUpdateProduct } = await this.productRestock(2);
-            this.product = afterUpdateProduct;
+            
+            // const { afterUpdateProduct } = await this.productRestock(2, 5);
+            // this.product = afterUpdateProduct;
+            // const { afterCompleteOrder } = await this.completeOrder(3);
+            // this.order = afterCompleteOrder
 
-
-            // try {
-            //     const id = 2;
-
-            //     logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} STARTED ===`)
-
-            //     const order = await store.getEntityById(EntityType.ORDER, { id: id, relations: ['items', 'items.product'] });
-            //     if (!order) {
-            //         throw new Error(`Order with ID: ${id} Not Found`)
-            //     }
-            //     await store.completeOrder(order);
-
-            //     logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED ===`);
-            //     logger.bgYellow(`=== RESULT STATUS BEFORE COMPLETION: ${order.status}`)
-            //     const completedOrder = await store.getEntityById(EntityType.ORDER, { id: id, relations: ['items', 'items.product'] });
-            //     logger.bgYellow(`=== RESULT STATUS AFTER COMPLETION: ${completedOrder!.status}`)
-            // } catch (error: any) {
-            //     logger.fail(`=== Operation: ${Operations.COMPLETE_ORDER} FAILED ===, ${error} `)
-            // }
-            // }
         } catch (error: any) {
             this.logger.bgFail(`${error.stack}`)
         }
-
-
-
-
     }
 
-    // TODO: Use decorator for operation start ...;
     private async createProduct(stock?: number) {
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_PRODUCT} STARTED ===`)
 
@@ -214,9 +197,7 @@ class App {
     }
 
     private async addToCart() {
-
-        this.logger.neutral(`=== OPERATION: ${Operations.ADD_TO_CART} FINISHED ===`)
-
+        this.logger.neutral(`=== OPERATION: ${Operations.ADD_TO_CART} STARTED ===`)
 
         try {
             return await this.manager.addToCart({ customer: this.customer, product: this.product });
@@ -230,7 +211,6 @@ class App {
 
         const customer = await this.manager.getEntityById(EntityType.CUSTOMER, { id: customerId })
         if (!customer) {
-            // NOTE: Have custom error class which receives automatically or passed the operation type (in this case add to cart )
             throw new Error(`Customer with ID: ${customerId} NOT FOUND!`)
         } else {
             this.customer = customer;
@@ -251,8 +231,8 @@ class App {
     }
 
     private async createOrder(customerId: number) {
-
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_ORDER} STARTED ===`)
+
         try {
             const customer = await this.manager.getEntityById(EntityType.CUSTOMER, { id: customerId, relations: ['cart', 'cart.items', 'cart.items.product'] });
             if (!customer) {
@@ -267,37 +247,27 @@ class App {
         }
     }
 
-    @Notify(SuccessEventName.PRODUCT_RESTOCK, ErrorEventName.ERROR_PRODUCT_RESTOCK)
-    private async productRestock(productId: number): Promise<ProductRestockResponse> {
+    private async productRestock(productId: number, stock: number = 15): Promise<ProductRestockResponse> {
         this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} STARTED ===`)
 
         try {
-            const product = await this.manager.getEntityById(EntityType.PRODUCT, { id: productId });
-            if (!product) {
-                throw new Error(`Product with ID: ${productId} NOT FOUND!`)
-            } else {
-                const updatePayload: UpdateProductPayload = {
-                    id: product.id,
-                    stock: product.stock + 15,
-                }
-
-                try { // NOTE: Triggers update and notify gets only the update result and not the before/after data 
-                    await this.manager.update(EntityType.PRODUCT, updatePayload);
-                } catch (err) {
-                    throw err
-                }
-
-                const updatedProduct = await this.manager.getEntityById(EntityType.PRODUCT, { id: productId })
-                if (!updatedProduct) {
-                    throw new Error(`Product with ID: ${productId} NOT FOUND!`)
-                }
-                return {
-                     beforeUpdateProduct: product,
-                    afterUpdateProduct: updatedProduct
-                }
-            }
+            return await this.manager.productRestock({ id: productId, stock });
         } catch (error) {
             throw error;
+        }
+    }
+
+    private async completeOrder(orderId: number): Promise<CompleteOrderResponse> {
+        this.logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} STARTED ===`)
+
+        try {
+            const order = await this.manager.getEntityById(EntityType.ORDER, { id: orderId, relations: ['items', 'items.product'] });
+            if (!order) {
+                throw new Error(`Order with ID: ${orderId} Not Found`)
+            }
+            return await this.manager.completeOrder(order);
+        } catch (error: any) {
+            throw error
         }
     }
 

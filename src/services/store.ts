@@ -4,8 +4,8 @@ import { Customer } from "../entities/Customer";
 import { Product } from "../entities/Product";
 import { AddToCart, CartService } from "./cart.service";
 import { CreateCustomerPayload, CustomerService } from "./customer.service";
-import { CreateProductPayload, ProductService, UpdateProductPayload } from "./product.service";
-import { CreateOrderPayload, OrderService } from "./order.service";
+import { CreateProductPayload, ProductService, UpdateProductPayload, UpdateProductRestockPayload } from "./product.service";
+import { CompleteOrderResponse, CreateOrderPayload, OrderService } from "./order.service";
 import { Order } from "../entities/Order";
 
 export enum EntityType {
@@ -102,7 +102,11 @@ export class StoreManager {
         return await this.cartService.addToCart(payload);
     }
 
-    public async completeOrder(order: Order) {
+    public async completeOrder(order: Order): Promise<CompleteOrderResponse> {
         return await this.orderService.completeOrder(order);
+    }
+
+    public async productRestock(payload: UpdateProductRestockPayload) {
+        return await this.productService.productRestock(payload);
     }
 }

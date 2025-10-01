@@ -12,7 +12,17 @@ export type CreateProductPayload = {
 }
 
 
+
+export type ProductRestockResponse = {
+    beforeUpdateProduct: Product,
+    afterUpdateProduct: Product
+}
+
+
+
 export type UpdateProductPayload = Partial<Product> & {id: number};
+
+export type UpdateProductRestockPayload = Pick<Product, 'id' | 'stock'>
 
 export class ProductService {
     private static instance: ProductService;
@@ -47,11 +57,39 @@ export class ProductService {
 
     @Notify(SuccessEventName.PRODUCT_UPDATED, ErrorEventName.ERROR_PRODUCT_UPDATED)
     async updateProduct(payload: UpdateProductPayload): Promise<UpdateResult> {
-        const beforeProduct = this.getProductById({id: payload.id});
+        return DatabaseManager.getRepository(Product).update({ id: payload.id } , payload);
+    }
 
-        const update = DatabaseManager.getRepository(Product).update({ id: payload.id } , payload);
-        const afterProduct = this.getProductById({id: payload.id});
-        return update;
+    @Notify(SuccessEventName.PRODUCT_RESTOCK, ErrorEventName.ERROR_PRODUCT_RESTOCK)
+    async productRestock(payload: UpdateProductRestockPayload): Promise<ProductRestockResponse> {
+        try {
+            const product = await this.getProductById({ id: payload.id });
+            if (!product) {
+                throw new Error(`Product with ID: ${payload.id} NOT FOUND!`)
+            } else {
+                const updatePayload: UpdateProductPayload = {
+                    id: product.id,
+                    stock: product.stock + payload.stock 
+                }
+
+                try { 
+                    await this.updateProduct(updatePayload);
+                } catch (err) {
+                    throw err
+                }
+
+                const updatedProduct = await this.getProductById({ id: payload.id })
+                if (!updatedProduct) {
+                    throw new Error(`Product with ID: ${payload.id} NOT FOUND!`)
+                }
+                return {
+                    beforeUpdateProduct: product,
+                    afterUpdateProduct: updatedProduct
+                }
+            }
+        } catch (error) {
+            throw error;
+        }
     }
 
 }

@@ -14,14 +14,18 @@ export type CreateOrderPayload = {
 }
 
 
-export type UpdateOrderPayload = Partial<Order> & {id: number};
+export type UpdateOrderPayload = Partial<Order> & { id: number };
+export type CompleteOrderResponse = {
+    beforeCompleteOrder: Order,
+    afterCompleteOrder: Order,
+}
 
 export class OrderService {
     private static instance: OrderService;
     private logger: Logger = Logger.getInstance();
-    
 
-    private constructor(private readonly database: DatabaseManager,private readonly productService: ProductService,) { }
+
+    private constructor(private readonly database: DatabaseManager, private readonly productService: ProductService,) { }
 
     public static getInstance(): OrderService {
         if (!this.instance) {
@@ -62,7 +66,9 @@ export class OrderService {
         return await DatabaseManager.getRepository(Order).save(order);
     }
 
-    async completeOrder(order: Order) {
+
+    @Notify(SuccessEventName.ORDER_COMPLETED, ErrorEventName.ERROR_ORDER_COMPLETED)
+    async completeOrder(order: Order): Promise<CompleteOrderResponse> {
         if (order.status === OrderStatus.COMPLETED) {
             throw new Error('Order Already Completed!')
         }
@@ -71,35 +77,51 @@ export class OrderService {
             const currentQty = acc.get(productId) ?? 0;
             acc.set(productId, currentQty + item.quantity);
             return acc;
-        },
-        new Map<number, number>());
+        },new Map<number, number>());
+
+        const errors = [];
 
         for (const [id, total] of productQuantities.entries()) {
-            const product = await this.productService.getProductById({id});
+            const product = await this.productService.getProductById({ id });
             if (!product) {
-                this.logger.fail(`Product with ID ${id} was not found. Skipping...`);
+                errors.push(`Product with ID ${id} was not found.`)
                 continue
             }
 
             if (product.stock >= total) {
-                await this.productService.updateProduct({ id: id, stock: product.stock - total})
+                await this.productService.updateProduct({ id: id, stock: product.stock - total })
             } else {
-                this.logger.fail(`Product "${product.name}" with ID: ${product.id} has insufficient stock!`)
-                this.logger.fail(`== Current Stock: ${product.stock} - Stock to Buy: ${total}`)
+                errors.push(`"Product ${product.name}" with ID: ${product.id} has only ${product.stock} in stock but needs ${total}.`)
                 continue
             }
         }
 
-       return await this.updateOrder({id: order.id, status: OrderStatus.COMPLETED});
-       
+        if (errors.length > 0) {
+            const message = `Order cannot be fulfilled! Issues: ${errors.join(`\n`)}`
+            throw new Error(message);
+        }
+
+
+        try {
+            await this.updateOrder({ id: order.id, status: OrderStatus.COMPLETED });
+        } catch (error) {
+            throw error;
+        }
+
+        const updatedOrder = await this.getOrderById({ id: order.id, relations: ['items', 'items.product'] });
+        if (!updatedOrder) {
+            throw new Error(`Product with ID: ${order.id} NOT FOUND!`)
+        }
+        return {
+            beforeCompleteOrder: order,
+            afterCompleteOrder: updatedOrder,
+        }
     }
 
 
     async updateOrder(payload: UpdateOrderPayload): Promise<UpdateResult> {
-        return DatabaseManager.getRepository(Order).update({ id: payload.id } , payload);
+        return DatabaseManager.getRepository(Order).update({ id: payload.id }, payload);
     }
-
-
 
     private applyDiscount(total: number, discountPercent: number): number {
         return Number((total * (1 - discountPercent / 100)).toFixed(2));
