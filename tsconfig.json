@@ -11,8 +11,7 @@
     "experimentalDecorators": true,
     "sourceMap": true,
     "skipLibCheck": true,
-        "strictPropertyInitialization": false
-
+    "strictPropertyInitialization": false,
   },
   "include": ["src/**/*.ts"]
 }
