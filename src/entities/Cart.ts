@@ -1,4 +1,4 @@
-import { Collection, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Customer } from "./Customer";
 import { CartItem } from "./CartItem";
 

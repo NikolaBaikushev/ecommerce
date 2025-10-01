@@ -1,8 +1,6 @@
 import { UpdateResult } from "typeorm";
-import { Customer } from "../entities/Customer";
 import { Order, OrderStatus } from "../entities/Order";
 import { OrderItem } from "../entities/OrderItem";
-import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
 import { Logger } from "./logger.service";
 import { ProductService } from "./product.service";
@@ -95,11 +93,7 @@ export class OrderService {
         }
 
 
-        try {
             await this.updateOrder({ id: order.id, status: OrderStatus.COMPLETED });
-        } catch (error) {
-            throw error;
-        }
 
         const updatedOrder = await this.getOrderById({ id: order.id, relations: ['items', 'items.product'] });
         if (!updatedOrder) {

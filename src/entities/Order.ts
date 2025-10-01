@@ -1,4 +1,4 @@
-import { Collection, PrimaryGeneratedColumn, Column, Entity, OneToOne, ManyToOne, OneToMany } from "typeorm";
+import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { Customer } from "./Customer";
 import { OrderItem } from "./OrderItem";
 
@@ -7,7 +7,7 @@ export enum OrderStatus {
     COMPLETED = 'completed'
 }
 
-type OrderSummary = Pick<Order, 'status' | 'total' | 'customer'>
+// type OrderSummary = Pick<Order, 'status' | 'total' | 'customer'>
 
 @Entity()
 export class Order {

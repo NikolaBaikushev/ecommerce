@@ -2,7 +2,6 @@ import { Notify } from "../common/decorators/notify";
 import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
 import { GetPayload } from "../common/types/domain/get";
 import { Customer } from "../entities/Customer";
-import { Order } from "../entities/Order";
 import { DatabaseManager } from "./database.service";
 
 export type CreateCustomerPayload = {

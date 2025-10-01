@@ -1,7 +1,5 @@
-import { Entity, UpdateResult } from "typeorm";
+import { UpdateResult } from "typeorm";
 import { Cart } from "../entities/Cart";
-import { Customer } from "../entities/Customer";
-import { Product } from "../entities/Product";
 import { AddToCart, CartService } from "./cart.service";
 import { CreateCustomerPayload, CustomerService } from "./customer.service";
 import { EntityType, EntityMap } from "../common/types/domain/core";

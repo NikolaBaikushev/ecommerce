@@ -1,4 +1,3 @@
-import { Entity, EntityNotFoundError, UpdateStatement } from "typeorm";
 import { Customer } from "./entities/Customer";
 import { Product } from "./entities/Product";
 import { OnEvent, RegisterEventHandlers } from "./common/decorators/on-event";
@@ -40,6 +39,8 @@ class App {
         // NOTE: In Order the OnEvent to work we have to add the "logger" property to the prototype (see: OnEvent implementation NOTE)
         // NOTE: Or use the Logger.getInstance().success - which is not bound to the App class or its prototype...
         // NOTE: Also done for practicising ...
+         
+        /* eslint-disable */
         if (!prototype.hasOwnProperty('logger')) {
             Object.defineProperty(prototype, 'logger', {
                 value: Logger.getInstance(),
@@ -171,40 +172,26 @@ class App {
     private async createProduct(stock?: number) {
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_PRODUCT} STARTED ===`)
 
-        try {
-            const product = await this.manager.create(EntityType.PRODUCT, {
+            return await this.manager.create(EntityType.PRODUCT, {
                 name: `Product ${Math.floor(Math.random() * 1000)}`,
                 price: Math.round((1 + Math.random() * 99) * 100) / 100,
                 stock: stock && stock > 0 ? stock : 0
             });
-            return product
-        } catch (error) {
-            throw error
-        }
     }
 
     private async createCustomer() {
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_CUSTOMER} STARTED ===`)
 
-        try {
-            const customer = await this.manager.create(EntityType.CUSTOMER, {
+            return  await this.manager.create(EntityType.CUSTOMER, {
                 name: `Customer ${Math.floor(Math.random() * 1000)}`,
                 isPremium: Math.random() < 0.5,
             });
-            return customer
-        } catch (error) {
-            throw error;
-        }
     }
 
     private async addToCart() {
         this.logger.neutral(`=== OPERATION: ${Operations.ADD_TO_CART} STARTED ===`)
 
-        try {
             return await this.manager.addToCart({ customer: this.customer, product: this.product });
-        } catch (error) {
-            throw error
-        }
     }
 
     private async addToCartWithCustomerAndProduct(customerId: number, productId: number) {
@@ -224,17 +211,12 @@ class App {
             this.product = product;
         }
 
-        try {
             return await this.manager.addToCart({ customer: this.customer, product: this.product });
-        } catch (error) {
-            throw error
-        }
     }
 
     private async createOrder(customerId: number) {
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_ORDER} STARTED ===`)
 
-        try {
             const customer = await this.manager.getEntityById(EntityType.CUSTOMER, { id: customerId, relations: ['cart', 'cart.items', 'cart.items.product'] });
             if (!customer) {
                 throw new Error(`Customer with ID: ${customerId} NOT FOUND!`)
@@ -243,33 +225,22 @@ class App {
                 return await this.manager.create(EntityType.ORDER, { customer: this.customer });
 
             }
-        } catch (error) {
-            throw error;
-        }
     }
 
     private async productRestock(productId: number, stock: number = 15): Promise<ProductRestockResponse> {
         this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} STARTED ===`)
 
-        try {
             return await this.manager.productRestock({ id: productId, stock });
-        } catch (error) {
-            throw error;
-        }
     }
 
     private async completeOrder(orderId: number): Promise<CompleteOrderResponse> {
         this.logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} STARTED ===`)
 
-        try {
             const order = await this.manager.getEntityById(EntityType.ORDER, { id: orderId, relations: ['items', 'items.product'] });
             if (!order) {
                 throw new Error(`Order with ID: ${orderId} Not Found`)
             }
             return await this.manager.completeOrder(order);
-        } catch (error: any) {
-            throw error
-        }
     }
 
 }

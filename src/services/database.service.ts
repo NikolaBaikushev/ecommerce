@@ -1,4 +1,4 @@
-import { EntityTarget, Not, ObjectLiteral, Repository } from "typeorm";
+import { ObjectLiteral, Repository } from "typeorm";
 import { AppDataSource } from "../datasource";
 import { Notify } from "../common/decorators/notify";
 import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";

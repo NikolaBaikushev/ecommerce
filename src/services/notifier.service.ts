@@ -1,5 +1,4 @@
 import { NotifyEvent } from "../common/events/notify-events";
-import { Singleton } from "../common/interfaces/singleton";
 
 type SubscriberFunction = (...params: any[]) => any
 

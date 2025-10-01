@@ -10,7 +10,9 @@ const EVENT_HANDLERS: Array<{
 }> = [];
 
 export function OnEvent(eventName: NotifyEvent) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    return function (target: any, propertyKey: string, _descriptor: PropertyDescriptor) {
+        void _descriptor;
+        
         EVENT_HANDLERS.push({
             eventName,
             target,
