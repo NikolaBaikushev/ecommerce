@@ -1,5 +1,4 @@
 import { Collection, PrimaryGeneratedColumn, Column, Entity, OneToOne, ManyToOne, OneToMany } from "typeorm";
-import { EntityType } from "../services/store";
 import { Customer } from "./Customer";
 import { OrderItem } from "./OrderItem";
 

@@ -1,16 +1,17 @@
 import { Entity, EntityNotFoundError, UpdateStatement } from "typeorm";
 import { Customer } from "./entities/Customer";
 import { Product } from "./entities/Product";
-import { DatabaseManager } from "./services/database.service";
-import { EntityType, StoreManager } from "./services/store";
-import chalk from 'chalk';
-import { Logger } from "./services/logger.service";
-import { ProductRestockResponse, UpdateProductPayload } from "./services/product.service";
-import { Order } from "./entities/Order";
-import { ErrorEventName, Notifier, Notify, OnEvent, registerEventHandlers, SuccessEventName, Use } from "./services/notifier.service";
+import { OnEvent, RegisterEventHandlers } from "./common/decorators/on-event";
+import { Use } from "./common/decorators/use";
+import { SuccessEventName, ErrorEventName } from "./common/events/notify-events";
+import { EntityType } from "./common/types/domain/core";
+import { CompleteOrderResponse } from "./common/types/order/response/complete-order-response";
+import { ProductRestockResponse } from "./common/types/product/response/product-restock-response";
 import { Cart } from "./entities/Cart";
-import { CompleteOrderResponse } from "./services/order.service";
-
+import { Order } from "./entities/Order";
+import { DatabaseManager } from "./services/database.service";
+import { Logger } from "./services/logger.service";
+import { StoreManager } from "./services/store";
 enum Operations {
     COMPLETE_ORDER = 'Complete Order',
     CREATE_ORDER = 'Create Order',
@@ -142,7 +143,7 @@ class App {
         this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
     }
 
-    @Use(registerEventHandlers)
+    @Use(RegisterEventHandlers)
     async run() {
         try {
             await DatabaseManager.getInstance().initialize();
@@ -151,16 +152,16 @@ class App {
         }
 
         try {
-            // this.product = await this.createProduct();
-            // this.customer = await this.createCustomer();
-            // this.cart = await this.addToCart();
-            // this.cart = await this.addToCartWithCustomerAndProduct(3, 2); // customerId 3, productId 2;
-            // this.order = await this.createOrder(3); // customerId 3 or 5
+            this.product = await this.createProduct();
+            this.customer = await this.createCustomer();
+            this.cart = await this.addToCart();
+            this.cart = await this.addToCartWithCustomerAndProduct(3, 2); // customerId 3, productId 2;
+            this.order = await this.createOrder(3); // customerId 3 or 5
             
-            // const { afterUpdateProduct } = await this.productRestock(2, 5);
-            // this.product = afterUpdateProduct;
-            // const { afterCompleteOrder } = await this.completeOrder(3);
-            // this.order = afterCompleteOrder
+            const { afterUpdateProduct } = await this.productRestock(2, 5);
+            this.product = afterUpdateProduct;
+            const { afterCompleteOrder } = await this.completeOrder(3);
+            this.order = afterCompleteOrder
 
         } catch (error: any) {
             this.logger.bgFail(`${error.stack}`)

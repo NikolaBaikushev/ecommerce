@@ -1,28 +1,13 @@
 import { UpdateResult } from "typeorm";
 import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
-import { GetPayload } from "./store";
-import { ErrorEventName, Notifier, Notify, SuccessEventName } from "./notifier.service";
+import { Notify } from "../common/decorators/notify";
+import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
+import { CreateProductPayload } from "../common/types/product/request/create-product-payload";
+import { UpdateProductPayload, UpdateProductRestockPayload } from "../common/types/product/request/update-product-payload";
+import { ProductRestockResponse } from "../common/types/product/response/product-restock-response";
+import { GetPayload } from "../common/types/domain/get";
 
-export type CreateProductPayload = {
-    name: string,
-    price: number,
-    description?: string,
-    stock?: number
-}
-
-
-
-export type ProductRestockResponse = {
-    beforeUpdateProduct: Product,
-    afterUpdateProduct: Product
-}
-
-
-
-export type UpdateProductPayload = Partial<Product> & {id: number};
-
-export type UpdateProductRestockPayload = Pick<Product, 'id' | 'stock'>
 
 export class ProductService {
     private static instance: ProductService;
@@ -57,7 +42,7 @@ export class ProductService {
 
     @Notify(SuccessEventName.PRODUCT_UPDATED, ErrorEventName.ERROR_PRODUCT_UPDATED)
     async updateProduct(payload: UpdateProductPayload): Promise<UpdateResult> {
-        return DatabaseManager.getRepository(Product).update({ id: payload.id } , payload);
+        return DatabaseManager.getRepository(Product).update({ id: payload.id }, payload);
     }
 
     @Notify(SuccessEventName.PRODUCT_RESTOCK, ErrorEventName.ERROR_PRODUCT_RESTOCK)
@@ -69,10 +54,10 @@ export class ProductService {
             } else {
                 const updatePayload: UpdateProductPayload = {
                     id: product.id,
-                    stock: product.stock + payload.stock 
+                    stock: product.stock + payload.stock
                 }
 
-                try { 
+                try {
                     await this.updateProduct(updatePayload);
                 } catch (err) {
                     throw err

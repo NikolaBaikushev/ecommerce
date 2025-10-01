@@ -4,40 +4,17 @@ import { Customer } from "../entities/Customer";
 import { Product } from "../entities/Product";
 import { AddToCart, CartService } from "./cart.service";
 import { CreateCustomerPayload, CustomerService } from "./customer.service";
-import { CreateProductPayload, ProductService, UpdateProductPayload, UpdateProductRestockPayload } from "./product.service";
-import { CompleteOrderResponse, CreateOrderPayload, OrderService } from "./order.service";
+import { EntityType, EntityMap } from "../common/types/domain/core";
+import { CreatePayloadMap } from "../common/types/domain/create";
+import { UpdatePayloadMap } from "../common/types/domain/update";
+import { CreateOrderPayload } from "../common/types/order/request/create-order-payload";
+import { CompleteOrderResponse } from "../common/types/order/response/complete-order-response";
+import { CreateProductPayload } from "../common/types/product/request/create-product-payload";
+import { UpdateProductPayload, UpdateProductRestockPayload } from "../common/types/product/request/update-product-payload";
 import { Order } from "../entities/Order";
-
-export enum EntityType {
-    PRODUCT,
-    CUSTOMER,
-    ORDER,
-}
-
-type EntityMap = {
-    [EntityType.PRODUCT]: Product,
-    [EntityType.CUSTOMER]: Customer,
-    [EntityType.ORDER]: Order,
-}
-
-type CreatePayloadMap = {
-    [EntityType.PRODUCT]: CreateProductPayload,
-    [EntityType.CUSTOMER]: CreateCustomerPayload
-    [EntityType.ORDER]: CreateOrderPayload
-}
-type UpdatePayloadMap = {
-    [EntityType.PRODUCT]: UpdateProductPayload,
-    [EntityType.CUSTOMER]: undefined,
-    [EntityType.ORDER]: undefined
-}
-
-
-export type GetPayload = {
-    id: number,
-    relations?: string[]
-}
-
-type EntityConstructor<T> = { new(): T }
+import { OrderService } from "./order.service";
+import { ProductService } from "./product.service";
+import { GetPayload } from "../common/types/domain/get";
 
 export class StoreManager {
     static #instance: StoreManager;
@@ -71,12 +48,8 @@ export class StoreManager {
     }
     public async update<T extends EntityType>(entityType: T, payload: UpdatePayloadMap[T]): Promise<UpdateResult> {
         switch (entityType) {
-            // case EntityType.CUSTOMER:
-            //     return await this.customerService.createCustomer(payload as CreateCustomerPayload) as Awaited<EntityMap[T]>;
             case EntityType.PRODUCT:
                 return await this.productService.updateProduct( payload as UpdateProductPayload) as any
-            // case EntityType.ORDER:
-            //     return await this.orderService.createOrder(payload as CreateOrderPayload) as Awaited<EntityMap[T]>;
             default:
                 throw new Error('Invalid entity type');
         }

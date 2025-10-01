@@ -6,19 +6,12 @@ import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
 import { Logger } from "./logger.service";
 import { ProductService } from "./product.service";
-import { GetPayload } from "./store";
-import { ErrorEventName, Notify, SuccessEventName } from "./notifier.service";
-
-export type CreateOrderPayload = {
-    customer: Customer
-}
-
-
-export type UpdateOrderPayload = Partial<Order> & { id: number };
-export type CompleteOrderResponse = {
-    beforeCompleteOrder: Order,
-    afterCompleteOrder: Order,
-}
+import { Notify } from "../common/decorators/notify";
+import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
+import { CreateOrderPayload } from "../common/types/order/request/create-order-payload";
+import { UpdateOrderPayload } from "../common/types/order/request/update-order-payload";
+import { CompleteOrderResponse } from "../common/types/order/response/complete-order-response";
+import { GetPayload } from "../common/types/domain/get";
 
 export class OrderService {
     private static instance: OrderService;

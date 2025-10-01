@@ -1,5 +1,4 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { EntityType } from "../services/store";
 import { Cart } from "./Cart";
 import { Product } from "./Product";
 
