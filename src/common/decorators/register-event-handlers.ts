@@ -1,4 +1,3 @@
-import { EventHandler } from "../../services/event-handler.service";
 import { Notifier } from "../../services/notifier.service";
 import { EVENT_HANDLERS, getInstanceCache } from "../helpers/register-event-handler-helpers";
 

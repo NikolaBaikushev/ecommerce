@@ -11,7 +11,6 @@ import { Order } from "./entities/Order";
 import { DatabaseManager } from "./services/database.service";
 import { Logger } from "./services/logger.service";
 import { StoreManager } from "./services/store";
-import { Notifier } from "./services/notifier.service";
 import { Operations } from "./services/event-handler.service";
 import { RegisterEventHandlers } from "./common/decorators/register-event-handlers";
 

@@ -1,5 +1,3 @@
-import { EventHandler } from "../../services/event-handler.service";
-import { Notifier } from "../../services/notifier.service";
 import { NotifyEvent } from "../events/notify-events";
 import { DECORATED_CLASSES, EVENT_HANDLERS } from "../helpers/register-event-handler-helpers";
 
