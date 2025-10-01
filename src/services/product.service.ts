@@ -47,26 +47,26 @@ export class ProductService {
 
     @Notify(SuccessEventName.PRODUCT_RESTOCK, ErrorEventName.ERROR_PRODUCT_RESTOCK)
     async productRestock(payload: UpdateProductRestockPayload): Promise<ProductRestockResponse> {
-            const product = await this.getProductById({ id: payload.id });
-            if (!product) {
-                throw new Error(`Product with ID: ${payload.id} NOT FOUND!`)
-            } else {
-                const updatePayload: UpdateProductPayload = {
-                    id: product.id,
-                    stock: product.stock + payload.stock
-                }
-
-                    await this.updateProduct(updatePayload);
-
-                const updatedProduct = await this.getProductById({ id: payload.id })
-                if (!updatedProduct) {
-                    throw new Error(`Product with ID: ${payload.id} NOT FOUND!`)
-                }
-                return {
-                    beforeUpdateProduct: product,
-                    afterUpdateProduct: updatedProduct
-                }
+        const product = await this.getProductById({ id: payload.id });
+        if (!product) {
+            throw new Error(`Product with ID: ${payload.id} NOT FOUND!`)
+        } else {
+            const updatePayload: UpdateProductPayload = {
+                id: product.id,
+                stock: product.stock + payload.stock
             }
+
+            await this.updateProduct(updatePayload);
+
+            const updatedProduct = await this.getProductById({ id: payload.id })
+            if (!updatedProduct) {
+                throw new Error(`Product with ID: ${payload.id} NOT FOUND!`)
+            }
+            return {
+                beforeUpdateProduct: product,
+                afterUpdateProduct: updatedProduct
+            }
+        }
     }
 
 }

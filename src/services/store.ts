@@ -1,7 +1,5 @@
 import { UpdateResult } from "typeorm";
 import { Cart } from "../entities/Cart";
-import { AddToCart, CartService } from "./cart.service";
-import { CreateCustomerPayload, CustomerService } from "./customer.service";
 import { EntityType, EntityMap } from "../common/types/domain/core";
 import { CreatePayloadMap } from "../common/types/domain/create";
 import { UpdatePayloadMap } from "../common/types/domain/update";
@@ -13,6 +11,10 @@ import { Order } from "../entities/Order";
 import { OrderService } from "./order.service";
 import { ProductService } from "./product.service";
 import { GetPayload } from "../common/types/domain/get";
+import { CreateCustomerPayload } from "../common/types/customer/request/create-customer-payload";
+import { CartService } from "./cart.service";
+import { CustomerService } from "./customer.service";
+import { CreateOrAddCartPayload } from "../common/types/cart/request/create-or-add-cart-payload";
 
 export class StoreManager {
     static #instance: StoreManager;
@@ -47,7 +49,7 @@ export class StoreManager {
     public async update<T extends EntityType>(entityType: T, payload: UpdatePayloadMap[T]): Promise<UpdateResult> {
         switch (entityType) {
             case EntityType.PRODUCT:
-                return await this.productService.updateProduct( payload as UpdateProductPayload) as any
+                return await this.productService.updateProduct(payload as UpdateProductPayload) as any
             default:
                 throw new Error('Invalid entity type');
         }
@@ -69,7 +71,7 @@ export class StoreManager {
         }
     }
 
-    public async addToCart(payload: AddToCart): Promise<Cart> {
+    public async addToCart(payload: CreateOrAddCartPayload): Promise<Cart> {
         return await this.cartService.addToCart(payload);
     }
 

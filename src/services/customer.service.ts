@@ -1,13 +1,10 @@
 import { Notify } from "../common/decorators/notify";
 import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
+import { CreateCustomerPayload } from "../common/types/customer/request/create-customer-payload";
 import { GetPayload } from "../common/types/domain/get";
 import { Customer } from "../entities/Customer";
 import { DatabaseManager } from "./database.service";
 
-export type CreateCustomerPayload = {
-    name: string,
-    isPremium?: boolean,
-}
 
 export class CustomerService {
     private static instance: CustomerService;
@@ -26,7 +23,7 @@ export class CustomerService {
     getCustomerById(payload: GetPayload): Promise<Customer | null> {
         const repository = DatabaseManager.getRepository(Customer);
         return repository.findOne({
-            where: {id: payload.id},
+            where: { id: payload.id },
             relations: [...(payload?.relations ?? [])]
         })
     }

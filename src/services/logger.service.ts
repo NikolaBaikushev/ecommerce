@@ -1,25 +1,10 @@
 import chalk from 'chalk';
-
-function WrapWithConsoleLog(
-  target: any,
-  propertyKey: string,
-  descriptor: PropertyDescriptor
-) {
-  const originalMethod = descriptor.value;
-
-  descriptor.value = function (...args: any[]) {
-    const result = originalMethod.apply(this, args);
-    console.log(result);
-    return result;
-  };
-
-  return descriptor;
-}
+import { WrapWithConsoleLog } from '../common/decorators/wrap-with-console-log';
 
 export class Logger {
     static #instance: Logger;
 
-    private constructor() {}
+    private constructor() { }
 
     public static getInstance() {
         if (!this.#instance) {
@@ -39,7 +24,7 @@ export class Logger {
     }
 
     @WrapWithConsoleLog
-    yellow(message:string) {
+    yellow(message: string) {
         return chalk.yellow(message)
     }
 

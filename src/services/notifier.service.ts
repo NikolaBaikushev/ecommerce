@@ -2,7 +2,7 @@ import { NotifyEvent } from "../common/events/notify-events";
 
 type SubscriberFunction = (...params: any[]) => any
 
-export class Notifier{
+export class Notifier {
     static #instance: Notifier;
 
     private eventMap = new Map<NotifyEvent, Set<SubscriberFunction>>();

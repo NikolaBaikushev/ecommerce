@@ -1,15 +1,9 @@
 import { Notify } from "../common/decorators/notify";
 import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
+import { CreateOrAddCartPayload } from "../common/types/cart/request/create-or-add-cart-payload";
 import { Cart } from "../entities/Cart";
 import { CartItem } from "../entities/CartItem";
-import { Customer } from "../entities/Customer";
-import { Product } from "../entities/Product";
 import { DatabaseManager } from "./database.service";
-
-export type AddToCart = {
-    customer: Customer,
-    product: Product
-}
 
 export class CartService {
     private static instance: CartService;
@@ -26,7 +20,7 @@ export class CartService {
     }
 
     @Notify(SuccessEventName.CART_CREATED, ErrorEventName.ERROR_CART_CREATED)
-    async addToCart(payload: AddToCart): Promise<Cart> {
+    async addToCart(payload: CreateOrAddCartPayload): Promise<Cart> {
         const repository = DatabaseManager.getRepository(Cart);
         let cart = await repository.findOne({
             where: { customer: { id: payload.customer.id } },

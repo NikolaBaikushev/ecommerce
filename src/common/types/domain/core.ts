@@ -1,7 +1,7 @@
 import { Customer } from "../../../entities/Customer";
 import { Order } from "../../../entities/Order";
 import { Product } from "../../../entities/Product";
-import { CreateCustomerPayload } from "../../../services/customer.service";
+import { CreateCustomerPayload } from "../customer/request/create-customer-payload";
 import { CreateOrderPayload } from "../order/request/create-order-payload";
 import { CreateProductPayload } from "../product/request/create-product-payload";
 import { UpdateProductPayload } from "../product/request/update-product-payload";

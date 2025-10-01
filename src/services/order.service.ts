@@ -2,7 +2,6 @@ import { UpdateResult } from "typeorm";
 import { Order, OrderStatus } from "../entities/Order";
 import { OrderItem } from "../entities/OrderItem";
 import { DatabaseManager } from "./database.service";
-import { Logger } from "./logger.service";
 import { ProductService } from "./product.service";
 import { Notify } from "../common/decorators/notify";
 import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
@@ -13,8 +12,6 @@ import { GetPayload } from "../common/types/domain/get";
 
 export class OrderService {
     private static instance: OrderService;
-    private logger: Logger = Logger.getInstance();
-
 
     private constructor(private readonly database: DatabaseManager, private readonly productService: ProductService,) { }
 
@@ -68,7 +65,7 @@ export class OrderService {
             const currentQty = acc.get(productId) ?? 0;
             acc.set(productId, currentQty + item.quantity);
             return acc;
-        },new Map<number, number>());
+        }, new Map<number, number>());
 
         const errors = [];
 
@@ -93,7 +90,7 @@ export class OrderService {
         }
 
 
-            await this.updateOrder({ id: order.id, status: OrderStatus.COMPLETED });
+        await this.updateOrder({ id: order.id, status: OrderStatus.COMPLETED });
 
         const updatedOrder = await this.getOrderById({ id: order.id, relations: ['items', 'items.product'] });
         if (!updatedOrder) {
