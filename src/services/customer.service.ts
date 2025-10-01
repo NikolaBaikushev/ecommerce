@@ -7,17 +7,17 @@ import { DatabaseManager } from "./database.service";
 
 
 export class CustomerService {
-    private static instance: CustomerService;
+    static #instance: CustomerService;
 
 
     private constructor(private readonly database: DatabaseManager) { }
 
     public static getInstance(): CustomerService {
-        if (!this.instance) {
+        if (!this.#instance) {
             const database = DatabaseManager.getInstance();
-            this.instance = new CustomerService(database);
+            this.#instance = new CustomerService(database);
         }
-        return this.instance;
+        return this.#instance;
     }
 
     getCustomerById(payload: GetPayload): Promise<Customer | null> {

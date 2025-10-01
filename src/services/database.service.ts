@@ -6,7 +6,7 @@ import { SuccessEventName, ErrorEventName } from "../common/events/notify-events
 
 
 export class DatabaseManager {
-    static instance: DatabaseManager;
+    static #instance: DatabaseManager;
 
     private constructor() { }
 
@@ -18,10 +18,10 @@ export class DatabaseManager {
     }
 
     public static getInstance() {
-        if (!this.instance) {
-            this.instance = new DatabaseManager();
+        if (!this.#instance) {
+            this.#instance = new DatabaseManager();
         }
-        return this.instance;
+        return this.#instance;
     }
 
     public static getRepository<T extends ObjectLiteral>(entity: { new(): T }): Repository<T> {

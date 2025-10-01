@@ -11,6 +11,7 @@ import { Order } from "./entities/Order";
 import { DatabaseManager } from "./services/database.service";
 import { Logger } from "./services/logger.service";
 import { StoreManager } from "./services/store";
+import { Notifier } from "./services/notifier.service";
 enum Operations {
     COMPLETE_ORDER = 'Complete Order',
     CREATE_ORDER = 'Create Order',

@@ -6,17 +6,17 @@ import { CartItem } from "../entities/CartItem";
 import { DatabaseManager } from "./database.service";
 
 export class CartService {
-    private static instance: CartService;
+    static #instance: CartService;
 
 
     private constructor(private readonly database: DatabaseManager) { }
 
     public static getInstance(): CartService {
-        if (!this.instance) {
+        if (!this.#instance) {
             const database = DatabaseManager.getInstance();
-            this.instance = new CartService(database);
+            this.#instance = new CartService(database);
         }
-        return this.instance;
+        return this.#instance;
     }
 
     @Notify(SuccessEventName.CART_CREATED, ErrorEventName.ERROR_CART_CREATED)

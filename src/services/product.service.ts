@@ -10,17 +10,16 @@ import { GetPayload } from "../common/types/domain/get";
 
 
 export class ProductService {
-    private static instance: ProductService;
-
+    static #instance: ProductService;
 
     private constructor(private readonly database: DatabaseManager) { }
 
     public static getInstance(): ProductService {
-        if (!this.instance) {
+        if (!this.#instance) {
             const database = DatabaseManager.getInstance();
-            this.instance = new ProductService(database);
+            this.#instance = new ProductService(database);
         }
-        return this.instance;
+        return this.#instance;
     }
 
     async getProductById(payload: GetPayload): Promise<Product | null> {

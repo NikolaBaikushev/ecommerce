@@ -11,16 +11,16 @@ import { CompleteOrderResponse } from "../common/types/order/response/complete-o
 import { GetPayload } from "../common/types/domain/get";
 
 export class OrderService {
-    private static instance: OrderService;
+    static #instance: OrderService;
 
     private constructor(private readonly database: DatabaseManager, private readonly productService: ProductService,) { }
 
     public static getInstance(): OrderService {
-        if (!this.instance) {
+        if (!this.#instance) {
             const database = DatabaseManager.getInstance();
-            this.instance = new OrderService(database, ProductService.getInstance());
+            this.#instance = new OrderService(database, ProductService.getInstance());
         }
-        return this.instance;
+        return this.#instance;
     }
 
     async getOrderById(payload: GetPayload): Promise<Order | null> {
