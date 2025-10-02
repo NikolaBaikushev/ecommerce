@@ -83,7 +83,7 @@ class App {
 
         return await this.manager.create(EntityType.CUSTOMER, {
             name: `Customer ${Math.floor(Math.random() * 1000)}`,
-            isPremium: Math.random() < 0.5,
+            isPremium: Math.random() < 0.5 || true,
             balance: 100
         });
     }

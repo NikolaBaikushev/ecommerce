@@ -15,10 +15,13 @@ import { Logger } from "./logger.service";
 import { PaymentService } from "./payment.service";
 import { Customer } from "../entities/Customer";
 import { printDiff } from "../common/helpers/diff-logging";
+import { Notifier } from "./notifier.service";
 
 export class OrderService {
     static #instance: OrderService;
     private logger: Logger = Logger.getInstance();
+    private notifier: Notifier = Notifier.getInstance();
+
     private constructor(private readonly database: DatabaseManager, private readonly productService: ProductService, private readonly paymentService: PaymentService) { }
 
     public static getInstance(): OrderService {
@@ -48,6 +51,9 @@ export class OrderService {
 
         if (customer.isPremium) {
             order.total = this.applyDiscount(order.total, 20);
+            // TODO: Notify discount applicatoin
+            // TODO: Diff the customer total before and after ... ;
+
         }
 
         order.items = cart.items.map(cartItem => {
@@ -123,7 +129,9 @@ export class OrderService {
     }
 
     private applyDiscount(total: number, discountPercent: number): number {
-        return Number((total * (1 - discountPercent / 100)).toFixed(2));
+        const discounted = Number((total * (1 - discountPercent / 100)).toFixed(2));
+        this.notifier.notify(SuccessEventName.ORDER_DISCOUNT_APPLIED, total, discounted);
+        return discounted;
     }
 
 
@@ -138,7 +146,7 @@ export class OrderService {
         this.logger.fail(`=== OPERATION: ${Operations.CREATE_ORDER} FAILED ===, ${error}`)
     }
 
-    
+
     @OnEvent(SuccessEventName.ORDER_COMPLETED)
     handleOrderCompleted(data: CompleteOrderResponse) {
         this.logger.yellow('=== UPDATED FIELDS: Order ===')
@@ -149,6 +157,12 @@ export class OrderService {
     @OnEvent(ErrorEventName.ERROR_ORDER_COMPLETED)
     handleOrderCompletedError(error: Error) {
         this.logger.fail(`=== OPERATION: ${Operations.COMPLETE_ORDER} FAILED ===, ${error}`)
+    }
+
+    @OnEvent(SuccessEventName.ORDER_DISCOUNT_APPLIED)
+    handleOrderDiscountApplication(beforeTotal: number, afterTotal: number) {
+        this.logger.neutral('=== ORDER DISCOUNT APPLIED ===')
+        printDiff({ total: beforeTotal }, { total: afterTotal });
     }
 }
 
