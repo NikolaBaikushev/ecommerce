@@ -21,6 +21,15 @@ export class CartService {
         return this.#instance;
     }
 
+    public async getCartByCustomerId(customerId: number) {
+        return await DatabaseManager.getRepository(Cart).findOne({
+            where: {
+                customer: { id: customerId }
+            },
+            relations: ['items', 'items.product']
+        })
+    }
+
     @Notify(SuccessEventName.CART_CREATED, ErrorEventName.ERROR_CART_CREATED)
     public async addToCart(payload: CreateOrAddCartPayload): Promise<Cart> {
         const repository = DatabaseManager.getRepository(Cart);

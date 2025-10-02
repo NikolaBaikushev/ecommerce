@@ -100,7 +100,7 @@ export class StoreManager {
     }
 
     public async checkoutCustomerCart(customerId: number): Promise<CompleteOrderResponse> {
-        const customer = await this.getEntityById(EntityType.CUSTOMER, { id: customerId, relations: ['cart', 'cart.items', 'cart.items.product']},);
+        const customer = await this.getEntityById(EntityType.CUSTOMER, { id: customerId, relations: ['cart', 'cart.items', 'cart.items.product'] },);
         if (!customer) {
             throw new Error(`Customer ID: ${customerId} not found!`)
         }

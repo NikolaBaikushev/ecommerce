@@ -39,7 +39,7 @@ export class PaymentService {
                         })
                         .then((updatedCustomer) => {
                             if (updatedCustomer) {
-                                const response: CustomerBalanceChangeResponse= {
+                                const response: CustomerBalanceChangeResponse = {
                                     beforeCustomerBalanceChange: beforeCustomer,
                                     afterCustomerBalanceChange: updatedCustomer,
                                 }

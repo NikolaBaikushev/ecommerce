@@ -167,7 +167,7 @@ class App {
 
 
     }
-    
+
     private async fullFlowWithMultipleProductsAndCheckout() {
         const customer = await this.createCustomer(1000);
 

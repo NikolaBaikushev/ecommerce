@@ -117,9 +117,9 @@ export class OrderService {
     public async updateOrder(payload: UpdateOrderPayload): Promise<UpdateResult> {
         return DatabaseManager.getRepository(Order).update({ id: payload.id }, payload);
     }
-    
+
     public async getOrderSummary(orderId: number): Promise<Order> {
-        const order = await this.getOrderById({id: orderId, relations: ['items', 'items.product']});
+        const order = await this.getOrderById({ id: orderId, relations: ['items', 'items.product'] });
         if (!order) {
             throw new Error(`Order with id: ${orderId} Not Found!`)
         }

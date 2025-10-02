@@ -7,7 +7,7 @@ import { SuccessEventName, ErrorEventName, EventToErrorMap } from "../events/not
 export function Notify<
     T extends SuccessEventName,
     E extends ErrorEventName = EventToErrorMap[T]
-    >(eventName: T, errorEventName?: E) {
+>(eventName: T, errorEventName?: E) {
     return function (
         target: any,
         propertyKey: string,

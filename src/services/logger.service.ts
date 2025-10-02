@@ -14,7 +14,7 @@ export class Logger {
     }
 
     @WrapWithConsoleLog
-    bold(message:string, hexColor: string = '#0dbd4b') {
+    bold(message: string, hexColor: string = '#0dbd4b') {
         return chalk.bold.hex(hexColor)(message)
     }
 

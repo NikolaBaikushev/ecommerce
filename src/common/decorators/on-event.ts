@@ -6,7 +6,7 @@ import { DECORATED_CLASSES, EVENT_HANDLERS } from "../helpers/register-event-han
 export function OnEvent(eventName: NotifyEvent) {
     return function (target: any, propertyKey: string, _descriptor: PropertyDescriptor) {
         void _descriptor;
-        
+
         EVENT_HANDLERS.push({
             eventName,
             target,

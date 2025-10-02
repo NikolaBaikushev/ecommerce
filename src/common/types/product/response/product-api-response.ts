@@ -3,9 +3,9 @@ export type FakestoreAPIProductResponse = {
     title: string,
     price: number,
     description: string,
-    category: string, 
+    category: string,
     image: string,
-    rating: Rating 
+    rating: Rating
 }
 
 type Rating = {

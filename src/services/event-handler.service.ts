@@ -14,7 +14,7 @@ export class EventHandler {
     static #instance: EventHandler;
     private logger: Logger = Logger.getInstance();
 
-    private constructor() {}
+    private constructor() { }
 
     static getInstance() {
         if (!this.#instance) {
@@ -22,5 +22,5 @@ export class EventHandler {
         }
         return this.#instance
     }
-    
+
 }
