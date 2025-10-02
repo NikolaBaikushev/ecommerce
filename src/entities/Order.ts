@@ -1,14 +1,12 @@
 import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, OneToMany, BaseEntity } from "typeorm";
 import { Customer } from "./Customer";
-import {  OrderItem } from "./OrderItem";
+import { OrderItem } from "./OrderItem";
 import { BaseEntityClass } from "./BaseEntity";
 
 export enum OrderStatus {
     CREATED = 'created',
     COMPLETED = 'completed'
 }
-
-// type OrderSummary = Pick<Order, 'status' | 'total' | 'customer'>
 
 type PrintableOrder<T extends Order> = {
     [K in keyof T]: K extends 'items' ? Omit<OrderItem, 'order'>[] : T[K]

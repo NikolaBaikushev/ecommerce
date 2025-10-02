@@ -51,9 +51,6 @@ export class OrderService {
 
         if (customer.isPremium) {
             order.total = this.applyDiscount(order.total, 20);
-            // TODO: Notify discount applicatoin
-            // TODO: Diff the customer total before and after ... ;
-
         }
 
         order.items = cart.items.map(cartItem => {
@@ -120,12 +117,18 @@ export class OrderService {
     public async updateOrder(payload: UpdateOrderPayload): Promise<UpdateResult> {
         return DatabaseManager.getRepository(Order).update({ id: payload.id }, payload);
     }
+    
+    public async getOrderSummary(orderId: number): Promise<Order> {
+        const order = await this.getOrderById({id: orderId, relations: ['items', 'items.product']});
+        if (!order) {
+            throw new Error(`Order with id: ${orderId} Not Found!`)
+        }
 
+        if (order.status !== OrderStatus.COMPLETED) {
+            throw new Error('Cannot Get Order Summary Unless Order Is Completed')
+        }
 
-
-    // TODO: Do the same for the other service nad entities, use typescript ...
-    public getOrderSummary() {
-
+        return order;
     }
 
     private applyDiscount(total: number, discountPercent: number): number {
