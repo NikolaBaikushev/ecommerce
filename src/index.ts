@@ -47,21 +47,12 @@ class App {
 
 
         try {
-            // this.product = await this.createProduct();
-            // this.customer = await this.createCustomer();
-            // this.cart = await this.addToCart()
-            // this.order = await this.createOrder(this.customer.id);
-            // await this.productRestock(this.product.id);
-            //  await this.completeOrder(this.order.id);
-            await this.fullFlowWithCleanData();
-            // await this.cleanFlow();
+            // await this.fullFlowWithCleanData();
+            // await this.fullFlowWithMultipleProducts();
+            await this.fullFlowWithMultipleProductsAndCheckout();
 
-            // const { afterUpdateProduct } = await this.productRestock(2, 5);
-            // this.product = afterUpdateProduct;
-            // const { afterCompleteOrder } = await this.completeOrder(3);
-            // this.order = afterCompleteOrder
 
-            this.catalog = await this.manager.getProductsCatalog();
+            // this.catalog = await this.manager.getProductsCatalog();
 
         } catch (error: any) {
             this.logger.bgFail(`${error.stack}`)
@@ -71,26 +62,26 @@ class App {
     private async createProduct(stock?: number) {
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_PRODUCT} STARTED ===`)
 
-        return await this.manager.create(EntityType.PRODUCT, {
+        return await this.manager.addProduct({
             name: `Product ${Math.floor(Math.random() * 1000)}`,
             price: Math.round((1 + Math.random() * 99) * 100) / 100,
             stock: stock && stock > 0 ? stock : 0
         });
     }
 
-    private async createCustomer() {
+    private async createCustomer(balance: number = 100) {
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_CUSTOMER} STARTED ===`)
 
-        return await this.manager.create(EntityType.CUSTOMER, {
+        return await this.manager.registerCustomer({
             name: `Customer ${Math.floor(Math.random() * 1000)}`,
             isPremium: Math.random() < 0.5 || true,
-            balance: 100
+            balance: balance
         });
     }
 
-    private async addToCart() {
+    private async addToCart(customer?: Customer, product?: Product) {
         this.logger.neutral(`=== OPERATION: ${Operations.ADD_TO_CART} STARTED ===`)
-        return await this.manager.addToCart({ customer: this.customer, product: this.product });
+        return await this.manager.addProductToCart({ customer: customer ?? this.customer, product: product ?? this.product });
     }
 
     private async addToCartWithCustomerAndProduct(customerId: number, productId: number) {
@@ -110,7 +101,7 @@ class App {
             this.product = product;
         }
 
-        return await this.manager.addToCart({ customer: this.customer, product: this.product });
+        return await this.manager.addProductToCart({ customer: this.customer, product: this.product });
     }
 
     private async createOrder(customerId: number) {
@@ -121,7 +112,7 @@ class App {
             throw new Error(`Customer with ID: ${customerId} NOT FOUND!`)
         } else {
             this.customer = customer;
-            return await this.manager.create(EntityType.ORDER, { customer: this.customer });
+            return await this.manager.placeOrder({ customer: this.customer });
 
         }
     }
@@ -129,7 +120,7 @@ class App {
     private async productRestock(productId: number, stock: number = 15): Promise<ProductRestockResponse> {
         this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} STARTED ===`)
 
-        return await this.manager.productRestock({ id: productId, stock });
+        return await this.manager.restockProductInventory({ id: productId, stock });
     }
 
     private async completeOrder(orderId: number): Promise<CompleteOrderResponse> {
@@ -146,21 +137,56 @@ class App {
      * @description This method represents the clean flow meaning new items creation
      * ex: creates product and customer and uses them to create the cart and then creates the order from it
      */
-    private async cleanFlow() {
+    private async fullFlowWithCleanData() {
         this.product = await this.createProduct();
         this.customer = await this.createCustomer();
-        this.cart = await this.addToCart();
+        this.cart = await this.addToCart()
         this.order = await this.createOrder(this.customer.id);
+        await this.productRestock(this.product.id, 150); // In case the order completion fails due to insufficient stock
+        await this.completeOrder(this.order.id);
     }
 
-    private async fullFlowWithCleanData() {
-           this.product = await this.createProduct();
-            this.customer = await this.createCustomer();
-            this.cart = await this.addToCart()
-            this.order = await this.createOrder(this.customer.id);
-            await this.productRestock(this.product.id, 150); // In case the order completion fails due to insufficient stock
-             await this.completeOrder(this.order.id);
+    private async fullFlowWithMultipleProducts() {
+        const customer = await this.createCustomer(1000);
+
+        const product1 = await this.createProduct();
+        const product2 = await this.createProduct();
+        const product3 = await this.createProduct();
+
+        await this.productRestock(product1.id)
+        await this.productRestock(product2.id)
+        await this.productRestock(product3.id)
+
+        await this.addToCart(customer, product1);
+        await this.addToCart(customer, product2);
+        await this.addToCart(customer, product3);
+
+        const order = await this.createOrder(customer.id);
+        await this.completeOrder(order.id);
+
+
+
     }
+    
+    private async fullFlowWithMultipleProductsAndCheckout() {
+        const customer = await this.createCustomer(1000);
+
+        const product1 = await this.createProduct();
+        const product2 = await this.createProduct();
+        const product3 = await this.createProduct();
+
+        await this.productRestock(product1.id)
+        await this.productRestock(product2.id)
+        await this.productRestock(product3.id)
+
+        await this.addToCart(customer, product1);
+        await this.addToCart(customer, product2);
+        await this.addToCart(customer, product3);
+
+        await this.manager.checkoutCustomerCart(customer.id); // gets cart, places orders and fulfills it...
+
+    }
+
 
 }
 

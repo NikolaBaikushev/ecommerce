@@ -1,8 +1,5 @@
-import { UpdateResult } from "typeorm";
 import { Cart } from "../entities/Cart";
 import { EntityType, EntityMap } from "../common/types/domain/core";
-import { CreatePayloadMap } from "../common/types/domain/create";
-import { UpdatePayloadMap } from "../common/types/domain/update";
 import { CreateOrderPayload } from "../common/types/order/request/create-order-payload";
 import { CompleteOrderResponse } from "../common/types/order/response/complete-order-response";
 import { CreateProductPayload } from "../common/types/product/request/create-product-payload";
@@ -20,6 +17,8 @@ import { FakestoreAPIProductResponse } from "../common/types/product/response/pr
 import { Mapper } from "../common/utils/product-response-mapper";
 import { Product } from "../entities/Product";
 import { ProductCatalog } from "../common/types/product/response/product-catalog-response";
+import { Customer } from "../entities/Customer";
+import { ProductRestockResponse } from "../common/types/product/response/product-restock-response";
 
 export class StoreManager {
     static #instance: StoreManager;
@@ -39,27 +38,6 @@ export class StoreManager {
     }
 
 
-    public async create<T extends EntityType>(entityType: T, payload: CreatePayloadMap[T]): Promise<Awaited<EntityMap[T]>> {
-        switch (entityType) {
-            case EntityType.CUSTOMER:
-                return await this.customerService.createCustomer(payload as CreateCustomerPayload) as Awaited<EntityMap[T]>;
-            case EntityType.PRODUCT:
-                return await this.productService.createProduct(payload as CreateProductPayload) as Awaited<EntityMap[T]>;
-            case EntityType.ORDER:
-                return await this.orderService.createOrder(payload as CreateOrderPayload) as Awaited<EntityMap[T]>;
-            default:
-                throw new Error('Invalid entity type');
-        }
-    }
-    public async update<T extends EntityType>(entityType: T, payload: UpdatePayloadMap[T]): Promise<UpdateResult> {
-        switch (entityType) {
-            case EntityType.PRODUCT:
-                return await this.productService.updateProduct(payload as UpdateProductPayload) as any
-            default:
-                throw new Error('Invalid entity type');
-        }
-    }
-
     public async getEntityById<T extends EntityType>(
         entityType: T,
         payload: GetPayload
@@ -76,18 +54,6 @@ export class StoreManager {
         }
     }
 
-    public async addToCart(payload: CreateOrAddCartPayload): Promise<Cart> {
-        return await this.cartService.addToCart(payload);
-    }
-
-    public async completeOrder(order: Order): Promise<CompleteOrderResponse> {
-        return await this.orderService.completeOrder(order);
-    }
-
-    public async productRestock(payload: UpdateProductRestockPayload) {
-        return await this.productService.productRestock(payload);
-    }
-
     public async getProductsCatalog(): Promise<ProductCatalog> {
         const data: FakestoreAPIProductResponse[] = await fetch('https://fakestoreapi.com/products').then(data => data.json());
         const apiProducts: Product[] = data.filter(p => !isProduct(p)).map(p => Mapper.toProduct(p));
@@ -98,6 +64,59 @@ export class StoreManager {
             dbProducts
         }
     }
+
+    public async registerCustomer(payload: CreateCustomerPayload): Promise<Customer> {
+        return await this.customerService.createCustomer(payload);
+    }
+
+    public async addProduct(payload: CreateProductPayload): Promise<Product> {
+        return await this.productService.createProduct(payload);
+    }
+
+    public async updateProductDetails(payload: UpdateProductPayload): Promise<Product | null> {
+        await this.productService.updateProduct(payload);
+        return await this.productService.getProductById(payload);
+    }
+
+    public async restockProductInventory(payload: UpdateProductRestockPayload): Promise<ProductRestockResponse> {
+        return await this.productService.productRestock(payload);
+    };
+
+
+    public async addProductToCart(payload: CreateOrAddCartPayload): Promise<Cart> {
+        return await this.cartService.addToCart(payload);
+    }
+
+    public async getCartByCustomerId(customerId: number): Promise<Cart | null> {
+        return await this.cartService.getCartByCustomerId(customerId);
+    }
+
+    public async placeOrder(payload: CreateOrderPayload): Promise<Order> {
+        return await this.orderService.createOrder(payload);
+    };
+
+    public async completeOrder(order: Order): Promise<CompleteOrderResponse> {
+        return await this.orderService.completeOrder(order);
+    }
+
+    public async checkoutCustomerCart(customerId: number): Promise<CompleteOrderResponse> {
+        const customer = await this.getEntityById(EntityType.CUSTOMER, { id: customerId, relations: ['cart', 'cart.items', 'cart.items.product']},);
+        if (!customer) {
+            throw new Error(`Customer ID: ${customerId} not found!`)
+        }
+        const cart = await this.getCartByCustomerId(customerId); // returns only cart but in this case I have it fromthe fetched customer 
+        if (!cart) {
+            throw new Error(`Customer ID:${customerId} doesn't have cart yet!`)
+        }
+        const order = await this.placeOrder({ customer })
+        return await this.completeOrder(order);
+    }
+
+
+
+
+
+
 }
 
 
