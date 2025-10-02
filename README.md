@@ -14,3 +14,10 @@
 3. Add to Cart
 4. Create Order
 5. Complete Order
+
+Key features:
+- CRUD Operations
+- Notify (@Notify) decorator to emit event.
+- Event Handler(@OnEvent) decorator to subscribe and handle emitted event.
+- Application of discount based on Customer status (isPremium)
+- Simple payment simulation using promises
