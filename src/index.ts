@@ -47,7 +47,11 @@ class App {
 
 
         try {
-            await this.cleanFlow();
+            this.product = await this.createProduct();
+            this.customer = await this.createCustomer();
+            this.cart = await this.addToCart()
+            this.order = await this.createOrder(this.customer.id);
+            // await this.cleanFlow();
 
             // const { afterUpdateProduct } = await this.productRestock(2, 5);
             // this.product = afterUpdateProduct;

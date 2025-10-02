@@ -51,13 +51,9 @@ export class CartService {
 
     @OnEvent(SuccessEventName.CART_CREATED)
     handleCartCreated(cart: Cart) {
-        this.logger.neutral(`=== OPERATION: ${Operations.ADD_TO_CART} FINISHED ===`)
 
-        this.logger.bgSuccess(`=== RESULT: Cart created with ID: ${cart.id} ===`)
-        this.logger.bgYellow(`=== RESULT ITEMS ===`)
-        for (const item of cart) {
-            this.logger.yellow(`\t +++ Cart Item ID: ${item.id} +++`)
-        }
+        this.logger.yellow(`=== RESULT: \n ${cart.toPrint()}`)
+        this.logger.neutral(`=== OPERATION: ${Operations.ADD_TO_CART} FINISHED ===`)
     }
 
     @OnEvent(ErrorEventName.ERROR_CART_CREATED)

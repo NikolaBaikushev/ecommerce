@@ -14,6 +14,11 @@ export class Logger {
     }
 
     @WrapWithConsoleLog
+    bold(message:string, hexColor: string = '#0dbd4b') {
+        return chalk.bold.hex(hexColor)(message)
+    }
+
+    @WrapWithConsoleLog
     success(message: string) {
         return chalk.green(message)
     }
@@ -44,7 +49,7 @@ export class Logger {
 
     @WrapWithConsoleLog
     neutral(message: string) {
-        return chalk.bgGrey(message)
+        return chalk.cyan(message)
     }
 
 }

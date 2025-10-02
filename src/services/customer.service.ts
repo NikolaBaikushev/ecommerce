@@ -45,8 +45,8 @@ export class CustomerService {
 
     @OnEvent(SuccessEventName.CUSTOMER_CREATED)
     handleCustomerCreated(customer: Customer) {
+        this.logger.yellow(`=== RESULT: ${customer.toPrint()} ===`);
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_CUSTOMER} FINISHED ===`)
-        this.logger.bgSuccess(`=== RESULT: Customer created with ID: ${customer.id} ===`)
     }
 
     @OnEvent(ErrorEventName.ERROR_CUSTOMER_CREATED)

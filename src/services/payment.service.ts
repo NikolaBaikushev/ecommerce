@@ -1,6 +1,7 @@
 import { Customer } from "../entities/Customer";
 import { Order } from "../entities/Order";
 import { CustomerService } from "./customer.service";
+import { Operations } from "./event-handler.service";
 import { Logger } from "./logger.service";
 
 export class PaymentService {
@@ -17,7 +18,7 @@ export class PaymentService {
 
 
     public processOrderPayment(customer: Customer, order: Order): Promise<void> {
-        this.logger.neutral('=== OPERATION: Payment started ... ===')
+        this.logger.neutral(`=== OPERATION: ${Operations.PAY} STARTED ===`)
 
         return new Promise((resolve, reject) => {
             setTimeout(() => {

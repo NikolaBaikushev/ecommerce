@@ -34,7 +34,7 @@ export class DatabaseManager {
 
     @OnEvent(SuccessEventName.DATABASE_INITIALIZED)
     handlDatabaseInitialize() {
-        this.logger.bgSuccess('===== Database successfully connected =====')
+        this.logger.bold('=== Database successfully connected ===')
     }
 
     @OnEvent(ErrorEventName.ERROR_DATABASE_INITIALIZED)

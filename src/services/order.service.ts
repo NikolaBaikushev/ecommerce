@@ -128,12 +128,8 @@ export class OrderService {
 
     @OnEvent(SuccessEventName.ORDER_CREATED)
     handleOrderCreated(order: Order) {
+        this.logger.yellow(`=== RESULT CART: \n ${order.toPrint()}`)
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_ORDER} FINISHED ===`)
-        this.logger.bgSuccess(`=== RESULT: Order created with ID: ${order.id} ===`)
-        this.logger.bgYellow(`=== RESULT ITEMS: ===`)
-        for (const item of order) {
-            this.logger.yellow(`\t +++ Order Item ID: ${item.id} +++`)
-        }
     }
 
     @OnEvent(ErrorEventName.ERROR_ORDER_CREATED)

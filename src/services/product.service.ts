@@ -78,8 +78,8 @@ export class ProductService {
 
     @OnEvent(SuccessEventName.PRODUCT_CREATED)
     handleProductCreated(product: Product) {
+        this.logger.yellow(`=== RESULT : ${product.toPrint()} ===`);
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_PRODUCT} FINISHED ===`)
-        this.logger.bgSuccess(`=== RESULT: Product created with ID: ${product.id} ===`)
     }
 
     @OnEvent(ErrorEventName.ERROR_PRODUCT_CREATED)
