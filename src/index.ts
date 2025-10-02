@@ -47,10 +47,13 @@ class App {
 
 
         try {
-            this.product = await this.createProduct();
-            this.customer = await this.createCustomer();
-            this.cart = await this.addToCart()
-            this.order = await this.createOrder(this.customer.id);
+            // this.product = await this.createProduct();
+            // this.customer = await this.createCustomer();
+            // this.cart = await this.addToCart()
+            // this.order = await this.createOrder(this.customer.id);
+            // await this.productRestock(this.product.id);
+            //  await this.completeOrder(this.order.id);
+            await this.fullFlowWithCleanData();
             // await this.cleanFlow();
 
             // const { afterUpdateProduct } = await this.productRestock(2, 5);
@@ -148,6 +151,15 @@ class App {
         this.customer = await this.createCustomer();
         this.cart = await this.addToCart();
         this.order = await this.createOrder(this.customer.id);
+    }
+
+    private async fullFlowWithCleanData() {
+           this.product = await this.createProduct();
+            this.customer = await this.createCustomer();
+            this.cart = await this.addToCart()
+            this.order = await this.createOrder(this.customer.id);
+            await this.productRestock(this.product.id, 150); // In case the order completion fails due to insufficient stock
+             await this.completeOrder(this.order.id);
     }
 
 }

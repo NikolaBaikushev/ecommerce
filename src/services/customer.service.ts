@@ -1,8 +1,10 @@
 import { Notify } from "../common/decorators/notify";
 import { OnEvent } from "../common/decorators/on-event";
 import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
+import { printDiff } from "../common/helpers/diff-logging";
 import { CreateCustomerPayload } from "../common/types/customer/request/create-customer-payload";
 import { UpdateCustomerPayload } from "../common/types/customer/request/update-customer.payload";
+import { CustomerBalanceChangeResponse } from "../common/types/customer/response/customer-balance-changed";
 import { GetPayload } from "../common/types/domain/get";
 import { Customer } from "../entities/Customer";
 import { DatabaseManager } from "./database.service";
@@ -40,7 +42,7 @@ export class CustomerService {
     }
 
     async updateCustomer(payload: UpdateCustomerPayload) {
-        return await DatabaseManager.getRepository(Customer).update({id: payload.id}, payload);
+        return await DatabaseManager.getRepository(Customer).update({ id: payload.id }, payload);
     }
 
     @OnEvent(SuccessEventName.CUSTOMER_CREATED)
@@ -53,5 +55,12 @@ export class CustomerService {
     handleCustomerCreatedError(error: Error) {
         this.logger.fail(`=== OPERATION: ${Operations.CREATE_CUSTOMER} FAILED ===, ${error}`)
     }
+
+    @OnEvent(SuccessEventName.CUSTOMER_BALANCE_CHANGED)
+    handleCustomerBalanceChanged(data: CustomerBalanceChangeResponse) {
+        this.logger.yellow('=== UPDATED FIELDS: Customer ===')
+        printDiff(data.beforeCustomerBalanceChange, data.afterCustomerBalanceChange);
+    }
 }
+
 

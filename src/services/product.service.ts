@@ -10,6 +10,7 @@ import { GetPayload } from "../common/types/domain/get";
 import { OnEvent } from "../common/decorators/on-event";
 import { Operations } from "./event-handler.service";
 import { Logger } from "./logger.service";
+import { printDiff } from "../common/helpers/diff-logging";
 
 export class ProductService {
     static #instance: ProductService;
@@ -90,9 +91,9 @@ export class ProductService {
 
     @OnEvent(SuccessEventName.PRODUCT_RESTOCK)
     handleProductRestock(data: ProductRestockResponse) {
+        this.logger.yellow('=== UPDATED FIELDS: Product ===')
+        printDiff(data.beforeUpdateProduct, data.afterUpdateProduct);
         this.logger.neutral(`=== OPERATION: ${Operations.RESTOCK} FINISHED ===`)
-        this.logger.bgYellow(`=== RESULT BEFORE RESTOCK: ${data?.beforeUpdateProduct?.stock} ===`);
-        this.logger.bgYellow(`=== RESULT AFTER RESTOCK: ${data?.afterUpdateProduct?.stock} ===`);
     }
 
     @OnEvent(ErrorEventName.ERROR_PRODUCT_RESTOCK)

@@ -14,6 +14,7 @@ import { Operations } from "./event-handler.service";
 import { Logger } from "./logger.service";
 import { PaymentService } from "./payment.service";
 import { Customer } from "../entities/Customer";
+import { printDiff } from "../common/helpers/diff-logging";
 
 export class OrderService {
     static #instance: OrderService;
@@ -128,7 +129,7 @@ export class OrderService {
 
     @OnEvent(SuccessEventName.ORDER_CREATED)
     handleOrderCreated(order: Order) {
-        this.logger.yellow(`=== RESULT CART: \n ${order.toPrint()}`)
+        this.logger.yellow(`=== RESULT: \n ${order.toPrint()}`)
         this.logger.neutral(`=== OPERATION: ${Operations.CREATE_ORDER} FINISHED ===`)
     }
 
@@ -137,11 +138,12 @@ export class OrderService {
         this.logger.fail(`=== OPERATION: ${Operations.CREATE_ORDER} FAILED ===, ${error}`)
     }
 
+    
     @OnEvent(SuccessEventName.ORDER_COMPLETED)
     handleOrderCompleted(data: CompleteOrderResponse) {
+        this.logger.yellow('=== UPDATED FIELDS: Order ===')
+        printDiff(data.beforeCompleteOrder, data.afterCompleteOrder);
         this.logger.neutral(`=== Operation: ${Operations.COMPLETE_ORDER} FINISHED ===`);
-        this.logger.bgYellow(`=== RESULT STATUS BEFORE COMPLETION: ${data?.beforeCompleteOrder?.status}`)
-        this.logger.bgYellow(`=== RESULT STATUS AFTER COMPLETION: ${data?.afterCompleteOrder?.status}`)
     }
 
     @OnEvent(ErrorEventName.ERROR_ORDER_COMPLETED)
