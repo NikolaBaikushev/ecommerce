@@ -12,13 +12,13 @@ import { CreateCustomerPayload } from "../common/types/customer/request/create-c
 import { CartService } from "./cart.service";
 import { CustomerService } from "./customer.service";
 import { CreateOrAddCartPayload } from "../common/types/cart/request/create-or-add-cart-payload";
-import { isProduct } from "../guards/isProduct";
 import { FakestoreAPIProductResponse } from "../common/types/product/response/product-api-response";
 import { Mapper } from "../common/utils/product-response-mapper";
 import { Product } from "../entities/Product";
 import { ProductCatalog } from "../common/types/product/response/product-catalog-response";
 import { Customer } from "../entities/Customer";
 import { ProductRestockResponse } from "../common/types/product/response/product-restock-response";
+import { isProduct } from "../common/guards/isProduct";
 
 export class StoreManager {
     static #instance: StoreManager;
