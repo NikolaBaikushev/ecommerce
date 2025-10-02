@@ -13,6 +13,7 @@ import { Logger } from "./services/logger.service";
 import { StoreManager } from "./services/store";
 import { Operations } from "./services/event-handler.service";
 import { RegisterEventHandlers } from "./common/decorators/register-event-handlers";
+import { ProductCatalog } from "./common/types/product/response/product-catalog-response";
 
 
 
@@ -26,6 +27,7 @@ class App {
     private product: Product;
     private cart: Cart;
     private order: Order;
+    private catalog: ProductCatalog;
 
     private constructor() {}
 
@@ -34,16 +36,6 @@ class App {
             this.#instance = new App();
         }
         return this.#instance;
-    }
-
-    @OnEvent(SuccessEventName.DATABASE_INITIALIZED)
-    handlDatabaseInitialize() {
-        this.logger.bgSuccess('===== Database successfully connected =====')
-    }
-
-    @OnEvent(ErrorEventName.ERROR_DATABASE_INITIALIZED)
-    handleDatabaseInitializeError(error: unknown) {
-        this.logger.bgFail(`=== Database connection FAILED ===, ${error}`)
     }
 
     @Use(RegisterEventHandlers)
@@ -55,16 +47,18 @@ class App {
         }
 
         try {
-            this.product = await this.createProduct();
-            this.customer = await this.createCustomer();
-            this.cart = await this.addToCart();
-            this.cart = await this.addToCartWithCustomerAndProduct(3, 2); // customerId 3, productId 2;
-            this.order = await this.createOrder(3); // customerId 3 or 5
+            // this.product = await this.createProduct();
+            // this.customer = await this.createCustomer();
+            // this.cart = await this.addToCart();
+            // this.cart = await this.addToCartWithCustomerAndProduct(3, 2); // customerId 3, productId 2;
+            // this.order = await this.createOrder(3); // customerId 3 or 5
             
-            const { afterUpdateProduct } = await this.productRestock(2, 5);
-            this.product = afterUpdateProduct;
-            const { afterCompleteOrder } = await this.completeOrder(3);
-            this.order = afterCompleteOrder
+            // const { afterUpdateProduct } = await this.productRestock(2, 5);
+            // this.product = afterUpdateProduct;
+            // const { afterCompleteOrder } = await this.completeOrder(3);
+            // this.order = afterCompleteOrder
+
+            this.catalog = await this.manager.getProductsCatalog();
 
         } catch (error: any) {
             this.logger.bgFail(`${error.stack}`)

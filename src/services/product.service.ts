@@ -10,6 +10,7 @@ import { GetPayload } from "../common/types/domain/get";
 import { OnEvent } from "../common/decorators/on-event";
 import { Operations } from "./event-handler.service";
 import { Logger } from "./logger.service";
+import { Database } from "sqlite3";
 
 export class ProductService {
     static #instance: ProductService;
@@ -23,6 +24,10 @@ export class ProductService {
             this.#instance = new ProductService(database);
         }
         return this.#instance;
+    }
+
+    async getAll() {
+        return DatabaseManager.getRepository(Product).find();
     }
 
     async getProductById(payload: GetPayload): Promise<Product | null> {

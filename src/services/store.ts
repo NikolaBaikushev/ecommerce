@@ -15,6 +15,11 @@ import { CreateCustomerPayload } from "../common/types/customer/request/create-c
 import { CartService } from "./cart.service";
 import { CustomerService } from "./customer.service";
 import { CreateOrAddCartPayload } from "../common/types/cart/request/create-or-add-cart-payload";
+import { isProduct } from "../guards/isProduct";
+import { FakestoreAPIProductResponse } from "../common/types/product/response/product-api-response";
+import { Mapper } from "../common/utils/product-response-mapper";
+import { Product } from "../entities/Product";
+import { ProductCatalog } from "../common/types/product/response/product-catalog-response";
 
 export class StoreManager {
     static #instance: StoreManager;
@@ -82,4 +87,17 @@ export class StoreManager {
     public async productRestock(payload: UpdateProductRestockPayload) {
         return await this.productService.productRestock(payload);
     }
+
+    public async getProductsCatalog(): Promise<ProductCatalog> {
+        const data: FakestoreAPIProductResponse[] = await fetch('https://fakestoreapi.com/products').then(data => data.json());
+        const apiProducts: Product[] = data.filter(p => !isProduct(p)).map(p => Mapper.toProduct(p));
+        const dbProducts: Product[] = await this.productService.getAll();
+
+        return {
+            apiProducts,
+            dbProducts
+        }
+    }
 }
+
+
