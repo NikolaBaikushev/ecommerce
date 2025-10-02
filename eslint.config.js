@@ -8,15 +8,15 @@ export default [
   js.configs.recommended,
   {
     files: ['**/*.ts'],
-    
+
     languageOptions: {
-      parser: tsParser, // <-- use the imported parser object here
+      parser: tsParser,
       parserOptions: {
         project: './tsconfig.json',
         sourceType: 'module',
       },
       globals: {
-        console: 'readonly'
+        console: 'readonly',
       }
     },
     plugins: {

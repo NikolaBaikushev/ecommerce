@@ -2,6 +2,7 @@ import { Notify } from "../common/decorators/notify";
 import { OnEvent } from "../common/decorators/on-event";
 import { SuccessEventName, ErrorEventName } from "../common/events/notify-events";
 import { CreateCustomerPayload } from "../common/types/customer/request/create-customer-payload";
+import { UpdateCustomerPayload } from "../common/types/customer/request/update-customer.payload";
 import { GetPayload } from "../common/types/domain/get";
 import { Customer } from "../entities/Customer";
 import { DatabaseManager } from "./database.service";
@@ -38,6 +39,9 @@ export class CustomerService {
         return repository.save(customer);
     }
 
+    async updateCustomer(payload: UpdateCustomerPayload) {
+        return await DatabaseManager.getRepository(Customer).update({id: payload.id}, payload);
+    }
 
     @OnEvent(SuccessEventName.CUSTOMER_CREATED)
     handleCustomerCreated(customer: Customer) {

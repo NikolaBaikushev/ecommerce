@@ -19,5 +19,6 @@ export class Customer {
     @OneToOne(() => Cart, cart => cart.customer,{cascade: true})
     cart: Cart
 
-
+    @Column({type: 'decimal', default: 0})
+    balance: number
 }

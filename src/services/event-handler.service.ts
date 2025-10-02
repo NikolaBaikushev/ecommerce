@@ -7,7 +7,7 @@ export enum Operations {
     CREATE_CUSTOMER = 'Create Customer',
     ADD_TO_CART = 'Add To Cart',
     RESTOCK = 'Restock',
-
+    PAY = 'Payment',
 }
 
 export class EventHandler {

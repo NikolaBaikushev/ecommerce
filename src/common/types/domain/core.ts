@@ -2,6 +2,7 @@ import { Customer } from "../../../entities/Customer";
 import { Order } from "../../../entities/Order";
 import { Product } from "../../../entities/Product";
 import { CreateCustomerPayload } from "../customer/request/create-customer-payload";
+import { UpdateCustomerPayload } from "../customer/request/update-customer.payload";
 import { CreateOrderPayload } from "../order/request/create-order-payload";
 import { CreateProductPayload } from "../product/request/create-product-payload";
 import { UpdateProductPayload } from "../product/request/update-product-payload";
@@ -27,4 +28,5 @@ export type CreatePayloadOf<T> =
 
 export type UpdatePayloadOf<T> =
     T extends typeof EntityType.PRODUCT ? UpdateProductPayload :
+    T extends typeof EntityType.CUSTOMER ? UpdateCustomerPayload :
     never;

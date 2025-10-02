@@ -12,16 +12,18 @@ import { GetPayload } from "../common/types/domain/get";
 import { OnEvent } from "../common/decorators/on-event";
 import { Operations } from "./event-handler.service";
 import { Logger } from "./logger.service";
+import { PaymentService } from "./payment.service";
+import { Customer } from "../entities/Customer";
 
 export class OrderService {
     static #instance: OrderService;
     private logger: Logger = Logger.getInstance();
-    private constructor(private readonly database: DatabaseManager, private readonly productService: ProductService,) { }
+    private constructor(private readonly database: DatabaseManager, private readonly productService: ProductService, private readonly paymentService: PaymentService) { }
 
     public static getInstance(): OrderService {
         if (!this.#instance) {
             const database = DatabaseManager.getInstance();
-            this.#instance = new OrderService(database, ProductService.getInstance());
+            this.#instance = new OrderService(database, ProductService.getInstance(), PaymentService.getInstance());
         }
         return this.#instance;
     }
@@ -36,14 +38,14 @@ export class OrderService {
 
     @Notify(SuccessEventName.ORDER_CREATED, ErrorEventName.ERROR_ORDER_CREATED)
     public async createOrder(payload: CreateOrderPayload): Promise<Order> {
-        const cart = payload.customer.cart;
+        const { cart, ...customer } = payload.customer; // customer doesnt have the cart relations ... (payload.customer has )
 
         const order = DatabaseManager.getRepository(Order).create({
-            customer: payload.customer,
+            customer,
             total: cart.totalPrice,
         })
 
-        if (payload.customer.isPremium) {
+        if (customer.isPremium) {
             order.total = this.applyDiscount(order.total, 20);
         }
 
@@ -53,6 +55,8 @@ export class OrderService {
             orderItem.quantity = cartItem.quantity;
             return orderItem;
         })
+
+        await this.paymentService.processOrderPayment(customer as Customer, order);
 
         return await DatabaseManager.getRepository(Order).save(order);
     }
